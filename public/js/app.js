@@ -110,10 +110,13 @@ canvas.addEventListener("click", (e) => {
 });
 
 // ------------------------------------------------------------------ feed
-function log(who, text, color = "var(--accent)", cls = "") {
+// icon: an art icon name (e.g. "whistle") shown in place of the colour dot.
+function log(who, text, color = "var(--accent)", cls = "", icon = null) {
   const list = $("log");
   list.querySelector(".empty")?.remove();
-  list.append(el("li", { class: cls, style: `--c:${color}` }, el("span", { class: "dot" }), el("div", {}, el("span", { class: "who" }, who), text)));
+  const src = icon && state.sportsIcon?.(icon);
+  const mark = src ? el("img", { class: "feed-ico", src, alt: "" }) : el("span", { class: "dot" });
+  list.append(el("li", { class: cls, style: `--c:${color}` }, mark, el("div", {}, el("span", { class: "who" }, who), text)));
   while (list.children.length > 80) list.firstChild.remove();
   list.scrollTop = list.scrollHeight;
 }
@@ -308,7 +311,7 @@ function applyFixtures(list) {
   for (const f of list) {
     const was = prev.get(f.fixtureId)?.prediction?.status;
     if (was && was !== "SETTLED" && f.prediction?.status === "SETTLED") {
-      log("Full time", `${f.homeTeam} v ${f.awayTeam}: +${fmtPts(f.prediction.points)} points, ${fmtCredits(Math.round(f.prediction.points * 10))} credits.`, "var(--accent)");
+      log("Full time", `${f.homeTeam} v ${f.awayTeam}: +${fmtPts(f.prediction.points)} points, ${fmtCredits(Math.round(f.prediction.points * 10))} credits.`, "var(--accent)", "", "whistle");
       office.screen = { mode: "result", title: `${f.homeTeam} v ${f.awayTeam}`, big: `+${fmtPts(f.prediction.points)} PTS`, lines: ["CHECK THE MATCH ROOM"] };
       office.celebrate(4);
       toast(`Result in: +${fmtPts(f.prediction.points)} points`);

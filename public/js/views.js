@@ -136,7 +136,7 @@ export function renderMatchRoom(root, ctx) {
       el("p", { class: "muted small" }, "Worth it after hiring: it replaces the draft and your edits."),
       runBtn(`Run again (${analysesAllowed - analysesUsed} left)`)));
   } else if (p.status === "SETTLED" || p.status === "VOID") {
-    right.push(el("div", { class: "card" }, el("h3", {}, p.status === "VOID" ? "Void" : "Result", el("small", {}, p.settledAt ? `settled ${fmtAgo(p.settledAt)}` : "")),
+    right.push(el("div", { class: "card" }, el("h3", {}, el("span", {}, ctx.state.sportsIcon?.("whistle") ? el("img", { class: "inline-ico", src: ctx.state.sportsIcon("whistle"), alt: "" }) : null, p.status === "VOID" ? "Void" : "Full time"), el("small", {}, p.settledAt ? `settled ${fmtAgo(p.settledAt)}` : "")),
       el("div", { class: "breakdown" }, MARKETS.map((m, i) => {
         const b = p.breakdown?.[m] || { result: "VOID", points: 0 };
         return el("div", { class: `bd ${b.result}`, style: `animation-delay:${i * 0.18}s` },

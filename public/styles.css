@@ -485,3 +485,4 @@ body.has-art .logo { background: none; box-shadow: none; }
 /* Kult Sports icons */
 .logo.art { background: none; box-shadow: none; }
 .inline-ico { width: 16px; height: 16px; image-rendering: pixelated; vertical-align: -3px; margin-right: 6px; }
+#log li .feed-ico { width: 14px; height: 14px; margin-top: 2px; image-rendering: pixelated; }
