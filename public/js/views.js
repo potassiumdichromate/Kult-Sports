@@ -46,7 +46,7 @@ export function renderConsole(root, ctx) {
     el("div", { class: "next-match" },
       el("p", { class: "eyebrow", style: "margin:0 0 4px" }, `Next match · ${next.leagueName}`),
       el("div", { class: "teams" }, `${next.homeTeam} v ${next.awayTeam}`),
-      el("div", { class: "meta" }, `${fmtDay(next.kickoffAt)} ${fmtTime(next.kickoffAt)} · picks lock in `, el("span", { class: "countdown", "data-until": next.lockAt }, fmtCountdown(Date.parse(next.lockAt) - Date.now())), next.prediction ? el("span", { class: `status ${st.cls}`, style: "margin-left:8px" }, st.text) : null)),
+      el("div", { class: "meta" }, ctx.state.sportsIcon?.("stopwatch") ? el("img", { class: "inline-ico", src: ctx.state.sportsIcon("stopwatch"), alt: "" }) : null, `${fmtDay(next.kickoffAt)} ${fmtTime(next.kickoffAt)} · picks lock in `, el("span", { class: "countdown", "data-until": next.lockAt }, fmtCountdown(Date.parse(next.lockAt) - Date.now())), next.prediction ? el("span", { class: `status ${st.cls}`, style: "margin-left:8px" }, st.text) : null)),
     el("div", { class: "console-actions" },
       el("button", { type: "button", class: "btn", onclick: () => ctx.go("matches") }, "All matches"),
       el("button", { type: "button", class: "btn primary", onclick: () => ctx.openMatch(next.fixtureId) }, next.prediction ? "Open match room" : "Analyse this match")));

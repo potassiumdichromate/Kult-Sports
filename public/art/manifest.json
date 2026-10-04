@@ -549,5 +549,52 @@
       "portrait": "ceo-hybrid-portrait.png"
     }
   },
-  "rev": "fc52817467"
+  "rev": "3446fb7f5e",
+  "sportsIcons": {
+    "office": {
+      "file": "icon-office.png",
+      "w": 48,
+      "h": 45
+    },
+    "matches": {
+      "file": "icon-matches.png",
+      "w": 48,
+      "h": 42
+    },
+    "talent": {
+      "file": "icon-talent.png",
+      "w": 40,
+      "h": 48
+    },
+    "history": {
+      "file": "icon-history.png",
+      "w": 48,
+      "h": 27
+    },
+    "leaders": {
+      "file": "icon-leaders.png",
+      "w": 48,
+      "h": 45
+    },
+    "agency": {
+      "file": "icon-agency.png",
+      "w": 48,
+      "h": 38
+    },
+    "emblem": {
+      "file": "icon-emblem.png",
+      "w": 42,
+      "h": 48
+    },
+    "whistle": {
+      "file": "icon-whistle.png",
+      "w": 48,
+      "h": 33
+    },
+    "stopwatch": {
+      "file": "icon-stopwatch.png",
+      "w": 42,
+      "h": 48
+    }
+  }
 }

@@ -481,3 +481,7 @@ body.has-art .logo { background: none; box-shadow: none; }
 }
 
 @media (max-width: 860px) { #stage { aspect-ratio: 3 / 2; } }
+
+/* Kult Sports icons */
+.logo.art { background: none; box-shadow: none; }
+.inline-ico { width: 16px; height: 16px; image-rendering: pixelated; vertical-align: -3px; margin-right: 6px; }

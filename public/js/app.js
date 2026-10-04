@@ -124,16 +124,22 @@ async function loadArt() {
   try {
     const manifest = await fetch(`art/manifest.json?t=${Date.now()}`, { cache: "no-store" }).then((r) => r.json());
     artUrl = (f) => `art/${f}${manifest.rev ? `?v=${manifest.rev}` : ""}`;
-    const files = [...new Set([manifest.background, ...Object.values(manifest.sprites || {}), ...Object.values(manifest.characters || {}), ...Object.values(manifest.icons || {})].map((x) => x?.file).filter(Boolean))];
+    const files = [...new Set([manifest.background, ...Object.values(manifest.sprites || {}), ...Object.values(manifest.characters || {}), ...Object.values(manifest.icons || {}), ...Object.values(manifest.sportsIcons || {})].map((x) => x?.file).filter(Boolean))];
     const images = {};
     await Promise.all(files.map((f) => new Promise((resolve) => { const img = new Image(); img.onload = () => { images[f] = img; resolve(); }; img.onerror = resolve; img.src = artUrl(f); })));
     office.useArt(manifest, images, artUrl);
     state.manifest = manifest;
     const icon = (name) => (manifest.icons?.[name] && images[manifest.icons[name].file] ? artUrl(manifest.icons[name].file) : null);
+    // Kult Sports icons (scripts/import-icons.mjs), falling back to pixel SVGs.
+    const sports = (name) => (manifest.sportsIcons?.[name] && images[manifest.sportsIcons[name].file] ? artUrl(manifest.sportsIcons[name].file) : null);
+    state.sportsIcon = sports;
+    const FALLBACK = { matches: "ball", leaders: "trophy", agency: "history" };
     for (const slot of document.querySelectorAll(".ico-slot")) {
-      const name = slot.dataset.icon, src = icon(name);
-      slot.replaceWith(src ? el("img", { class: "ico", src, alt: "" }) : pixelIcon(ICONS[name] || ICONS.ball));
+      const name = slot.dataset.icon, src = sports(name) || icon(name);
+      slot.replaceWith(src ? el("img", { class: "ico", src, alt: "" }) : pixelIcon(ICONS[name] || ICONS[FALLBACK[name]] || ICONS.ball));
     }
+    const emblem = sports("emblem");
+    if (emblem) { const logo = document.querySelector(".logo"); logo.replaceChildren(el("img", { src: emblem, alt: "" })); logo.classList.add("art"); }
     const coin = icon("coin");
     if (coin) for (const c of document.querySelectorAll(".coin")) c.replaceWith(el("img", { class: "coin-img", src: coin, alt: "" }));
   } catch (e) {

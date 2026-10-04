@@ -86,3 +86,4 @@ The Privy dashboard must list this site's origin as allowed.
 | `public/js/demo.js` | The offline demo API |
 | `public/art/` | Office art (from Kult Create); `node scripts/recolor.mjs` recolours the room from `art-source/` |
 | `privy-login/` | The Privy login bundle source |
+| `scripts/import-icons.mjs` | Imports the icon sheet (a 3x3 ChatGPT sheet: office, matches, talent, history, leaders, agency, emblem, whistle, stopwatch) into `public/art/icon-*.png`: `node scripts/import-icons.mjs path/to/sports-ui.png` |
