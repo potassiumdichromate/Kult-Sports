@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="referrer" content="no-referrer">
+  <title>Kult Sports</title>
+  <meta name="description" content="Run a football analysis agency. Your AI Arena agent is the CEO, your analysts read every match, and real results climb the global leaderboards.">
+  <meta name="theme-color" content="#06110d">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pixelify+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <header id="hud" class="panel" hidden>
+      <div class="studio">
+        <div class="logo" aria-hidden="true">KS</div>
+        <div>
+          <div id="agency-name" class="display">Agency</div>
+          <div id="agency-sub" class="muted small"></div>
+        </div>
+      </div>
+      <div class="hud-level" title="Agency level: more desks at every level">
+        <div class="k">Level <b id="hud-level">1</b> · <span id="hud-points" class="hud-points">0</span> pts</div>
+        <div class="bar"><i id="hud-level-bar" style="--c:var(--accent);width:0%"></i></div>
+      </div>
+      <div class="badges">
+        <span id="ceo-badge" class="badge gold" title="CEO: your AI Arena agent"></span>
+      </div>
+      <div class="credits" title="Agency credits">
+        <span class="coin" aria-hidden="true"></span>
+        <span id="credits" class="display">0</span>
+        <span class="muted small">credits</span>
+      </div>
+    </header>
+
+    <nav id="sidebar" class="panel" hidden aria-label="Agency">
+      <button type="button" class="nav-item active" data-view="office" aria-label="Office"><span class="ico-slot" data-icon="office"></span><span>Office</span></button>
+      <button type="button" class="nav-item" data-view="matches" aria-label="Matches"><span class="ico-slot" data-icon="ball"></span><span>Matches</span></button>
+      <button type="button" class="nav-item" data-view="talent" aria-label="Talent"><span class="ico-slot" data-icon="talent"></span><span>Talent</span></button>
+      <button type="button" class="nav-item" data-view="history" aria-label="History"><span class="ico-slot" data-icon="history"></span><span>History</span></button>
+      <button type="button" class="nav-item" data-view="leaders" aria-label="Leaderboard"><span class="ico-slot" data-icon="trophy"></span><span>Leaders</span></button>
+      <button type="button" class="nav-item" data-view="agency" aria-label="Agency"><span class="ico-slot" data-icon="credits"></span><span>Agency</span></button>
+    </nav>
+
+    <section id="matches-view" class="panel view-panel" hidden aria-label="Matches"></section>
+    <section id="match-view" class="panel view-panel" hidden aria-label="Match room"></section>
+    <section id="talent-view" class="panel view-panel" hidden aria-label="Talent pool"></section>
+    <section id="history-view" class="panel view-panel" hidden aria-label="My predictions"></section>
+    <section id="leaders-view" class="panel view-panel" hidden aria-label="Leaderboards"></section>
+    <section id="agency-view" class="panel view-panel" hidden aria-label="Agency"></section>
+
+    <main id="stage" class="panel" hidden>
+      <canvas id="office" aria-label="Your agency office: analysts at their desks and your CEO on the pitch rug"></canvas>
+      <div id="bubbles" aria-live="polite"></div>
+      <div id="tooltip" hidden></div>
+    </main>
+
+    <section id="console" class="panel" hidden aria-label="Next match"></section>
+
+    <aside id="feed" class="panel" hidden aria-label="Office feed">
+      <div class="feed-head">
+        <h2 class="display">Office feed</h2>
+        <button type="button" class="btn small" data-view-link="matches">Matches</button>
+      </div>
+      <ol id="log"><li class="empty">Your analysts will talk here.</li></ol>
+    </aside>
+  </div>
+
+  <div id="booting" class="overlay booting" role="status">
+    <div class="boot-box">
+      <span class="boot-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+      <p class="display">Opening the agency…</p>
+    </div>
+  </div>
+
+  <!-- Entrance -->
+  <div id="entrance" class="overlay" hidden>
+    <div class="sheet">
+      <h1 class="sign display"><span class="k">KULT</span> <span class="s">SPORTS</span></h1>
+      <p class="lead">Run a football analysis agency.</p>
+      <ul class="perks">
+        <li>Your <b>AI Arena agent</b> is the CEO</li>
+        <li>Hire analysts who read every match their own way</li>
+        <li>Lock your picks; real results score points and credits</li>
+        <li>Climb the <b>weekly</b> and <b>all-time</b> leaderboards</li>
+      </ul>
+      <button id="sign-in" class="btn primary" hidden>Sign in</button>
+      <p id="kult-browser-hint" class="muted small">Open Kult Sports from the Kult browser to play with your KULT account.</p>
+      <p id="entrance-error" class="error" hidden></p>
+      <details id="paste" class="paste" hidden>
+        <summary>Developer: paste an AI Arena token</summary>
+        <form id="paste-form" class="row" style="margin-top:8px">
+          <input id="paste-token" autocomplete="off" placeholder="eyJ…" aria-label="AI Arena token">
+          <button class="btn small" type="submit">Use</button>
+        </form>
+      </details>
+      <p class="muted small" style="margin-top:14px"><a class="linkish" href="?demo=1">Try the demo</a> without an account.</p>
+    </div>
+  </div>
+
+  <!-- Found your agency -->
+  <div id="found" class="overlay" hidden>
+    <form id="found-form" class="sheet wide">
+      <h2 class="display">Found your agency</h2>
+      <p class="muted small">Signed in as <span id="found-player"></span></p>
+      <label class="field">Agency name
+        <input id="found-name" maxlength="32" minlength="3" required placeholder="Pixel FC" autocomplete="off">
+      </label>
+      <p class="muted small">3–32 letters, numbers, spaces and ' &amp; . -</p>
+      <div class="field">
+        <span class="label">CEO</span>
+        <p class="muted small">Pick one of your AI Arena agents to run the agency.</p>
+        <div id="found-agents" class="ceo-list"></div>
+      </div>
+      <p id="found-error" class="error" hidden></p>
+      <div class="actions">
+        <button type="button" class="btn ghost sign-out">Sign out</button>
+        <button type="submit" id="found-btn" class="btn primary">Open the agency</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- No agents yet -->
+  <div id="no-agent" class="overlay" hidden>
+    <div class="sheet">
+      <h2 class="display">You need an agent first</h2>
+      <p>Your agency is run by one of your own <b>AI Arena agents</b>. We couldn't find one on this account.</p>
+      <div class="actions column">
+        <a id="no-agent-create" class="btn primary" target="_blank" rel="noopener" href="https://app.kult.games">Create an agent in AI Arena</a>
+        <button type="button" id="no-agent-retry" class="btn">I have one now, check again</button>
+        <button type="button" class="btn ghost sign-out">Sign out</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Analyst card -->
+  <div id="analyst-sheet" class="overlay" hidden>
+    <div class="sheet">
+      <button type="button" class="close" data-close="analyst-sheet" aria-label="Close">×</button>
+      <div id="analyst-body"></div>
+    </div>
+  </div>
+
+  <!-- Confirm -->
+  <div id="confirm" class="overlay" hidden>
+    <div class="sheet" role="alertdialog" aria-labelledby="confirm-title">
+      <h2 id="confirm-title" class="display">Are you sure?</h2>
+      <p id="confirm-text"></p>
+      <div class="actions">
+        <button type="button" id="confirm-no" class="btn ghost">Cancel</button>
+        <button type="button" id="confirm-yes" class="btn primary">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" role="status" hidden></div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

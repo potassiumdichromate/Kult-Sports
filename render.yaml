@@ -1,0 +1,31 @@
+# Render Blueprint for the Kult Sports web game.
+#
+# NOTE: syncing this Blueprint CREATES A BILLABLE web service (starter plan).
+# Change `plan` to `free` for a free service (it sleeps when idle, so the
+# first visit after a pause is slow).
+#
+# Browsers call the Kult Sports API (pixel-agency-api) directly: add this
+# service's URL to the API's CORS_ORIGINS. This server serves the game and
+# turns Privy logins into AI Arena tokens.
+
+services:
+  - type: web
+    name: kult-sports
+    runtime: node
+    region: oregon
+    plan: starter
+    buildCommand: npm install --include=dev --no-audit --no-fund && npm run build
+    startCommand: node server.mjs
+    healthCheckPath: /health
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_VERSION
+        value: "22.20.0"
+      - key: PUBLIC_API_URL
+        value: https://pixel-agency-api.onrender.com
+      - key: AI_ARENA_API_URL
+        value: https://aiarena-gateway.kult.games
+      - key: PRIVY_APP_ID
+        sync: false                     # the shared KULT Privy app (same as AI Arena)
+      - key: PRIVY_CLIENT_ID
+        sync: false                     # optional
