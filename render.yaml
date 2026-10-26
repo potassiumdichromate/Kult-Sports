@@ -29,3 +29,5 @@ services:
         sync: false                     # the shared KULT Privy app (same as AI Arena)
       - key: PRIVY_CLIENT_ID
         sync: false                     # optional
+      - key: MINDS_CLIENT_ID
+        sync: false                     # Hello Minds OAuth client id; unset hides "Your Mind"

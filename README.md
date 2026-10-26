@@ -15,7 +15,7 @@ login bundle.
 
 ```bash
 npm install --include=dev
-npm run build          # Privy login bundle -> public/privy/
+npm run build          # Privy and Minds login bundles -> public/privy/, public/minds/
 npm start              # http://localhost:4400
 ```
 
@@ -69,6 +69,7 @@ the first deploy:
 | `AI_ARENA_API_URL` | `https://aiarena-gateway.kult.games` | AI Arena gateway, for the Privy exchange |
 | `PRIVY_APP_ID` | (unset: Privy login hidden) | The shared KULT Privy app, the one AI Arena verifies |
 | `PRIVY_CLIENT_ID` | | Optional Privy client id |
+| `MINDS_CLIENT_ID` | (unset: "Your Mind" hidden) | Hello Minds OAuth client id (public), for letting a player's Mind direct their agency. Register `https://<this site>/minds/callback` as its redirect URI and this site as an authorized origin, with scopes `email` and `minds:list`. |
 | `AI_ARENA_APP_URL` | `https://app.kult.games` | "Create an agent" link |
 | `FRAME_ANCESTORS` | (unset) | Optional CSP `frame-ancestors` value |
 | `PORT` | `4400` | |
@@ -86,4 +87,9 @@ The Privy dashboard must list this site's origin as allowed.
 | `public/js/demo.js` | The offline demo API |
 | `public/art/` | Office art (from Kult Create); `node scripts/recolor.mjs` recolours the room from `art-source/` |
 | `privy-login/` | The Privy login bundle source |
+| `minds-login/` | The Hello Minds sign-in bundle source (Minds Connect) |
 | `scripts/import-icons.mjs` | Imports the icon sheet (a 3x3 ChatGPT sheet: office, matches, talent, history, leaders, agency, emblem, whistle, stopwatch) into `public/art/icon-*.png`: `node scripts/import-icons.mjs path/to/sports-ui.png` |
+
+## Your Mind directs
+
+A player can let their Hello Minds agent run the agency (Pixel Agency docs: "Mind directors"). On the Agency screen, **Let your Mind direct** signs the player in with Minds; Hello Minds returns to `/minds/callback`, which `server.mjs` redirects to the game page with the OAuth code. The game then links the Mind (`POST /v1/agency/mind`) and shows a director key once, with a message for the player to send their Mind: it points the Mind at the director spec (`directorSpecUrl` in `/config.json`) so it builds its own Skill. History marks the picks the Mind made.

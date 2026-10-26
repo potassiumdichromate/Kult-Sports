@@ -1,3 +1,5 @@
 node_modules/
 # built by npm run build (privy-login/)
 public/privy/
+# built by npm run build (minds-login/)
+public/minds/

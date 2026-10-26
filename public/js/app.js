@@ -16,12 +16,19 @@ if (handoff) {
   params.delete("jwt"); params.delete("source");
   history.replaceState(null, "", `${location.pathname}${params.toString() ? `?${params}` : ""}${location.hash}`);
 }
+// Back from Hello Minds after "Let your Mind direct" (server.mjs redirects
+// /minds/callback here). Keep the OAuth code and state for the Minds island,
+// then clean the address bar.
+const mindsCallback = params.has("mindsCallback") ? `?${params}` : null;
+if (mindsCallback) history.replaceState(null, "", `${location.pathname}${location.hash}`);
 
 // The API client needs config.json (its address), so it's created in boot().
 let api = demoMode ? createDemoApi({ fresh: demoMode === "fresh" }) : null;
 const state = {
   cfg: {}, me: null, agency: null, fixtures: null, talent: null, predictions: null, ledger: null,
-  leaderboards: {}, lbKind: "weekly", matchFilter: "upcoming", room: null, view: "office", inOffice: false, analysing: false
+  leaderboards: {}, lbKind: "weekly", matchFilter: "upcoming", room: null, view: "office", inOffice: false, analysing: false,
+  // Your Mind directs: the link status, the account's Minds (when choosing), and a key shown once.
+  mind: null, mindsList: null, mindKey: null
 };
 const canvas = $("office"), office = new Office(canvas);
 let scale = 1, artUrl = (f) => `art/${f}`;
@@ -38,6 +45,10 @@ const ctx = {
   fire: (a, btn) => fire(a, btn),
   openAnalyst: (id) => openAnalyst(id),
   changeCeo: (id, btn) => changeCeo(id, btn),
+  connectMind: (btn) => connectMind(btn),
+  chooseMind: (id, btn) => chooseMind(id, btn),
+  newMindKey: (btn) => newMindKey(btn),
+  unlinkMind: (btn) => unlinkMind(btn),
   loadLeaders: (k) => loadLeaders(k),
   closeSheet: (id) => show(id, false),
   signOut: () => signOutEverywhere(),
@@ -341,6 +352,7 @@ async function enterOffice(agency, fresh = false) {
   if (agency.credits < agency.payroll.weeklyTotal) logSystem(`Payday needs ${fmtCredits(agency.payroll.weeklyTotal)} credits and you have ${fmtCredits(agency.credits)}. Win points before Monday.`);
   setTimeout(() => say("ceo", fresh ? "Welcome to the agency! Let's hire a desk." : agency.staff.length ? "Morning, team. Who's playing today?" : "Empty desks… let's find some analysts."), 700);
   try { applyFixtures((await api.fixtures()).fixtures); } catch (e) { if (e.status !== 401) { state.fixtures = []; V.renderConsole($("console"), ctx); toastError(e); } }
+  if (mindsCallback) finishMindsLink();
   clearInterval(pollTimer);
   pollTimer = setInterval(() => { if (document.visibilityState === "visible" && state.inOffice && !state.analysing) refreshAll(); }, 90_000);
 }
@@ -363,6 +375,7 @@ function setView(view) {
   if (view === "talent") api.talent().then((t) => { state.talent = t; if (state.view === "talent") renderView("talent"); }).catch(toastError);
   if (view === "history") api.predictions().then((p) => { state.predictions = p.predictions; if (state.view === "history") renderView("history"); }).catch(toastError);
   if (view === "agency") api.ledger().then((l) => { state.ledger = l; if (state.view === "agency") renderView("agency"); }).catch(toastError);
+  if (view === "agency" && state.cfg.mindsClientId && !api.demo) loadMindStatus();
   if (view === "leaders") loadLeaders(state.lbKind);
   if (view === "matches" && !state.fixtures) api.fixtures().then((fx) => applyFixtures(fx.fixtures)).catch(toastError);
 }
@@ -587,6 +600,79 @@ async function changeCeo(agentId, btn) {
   try { applyAgency(await api.setCeo(agentId)); toast(`${state.agency.ceo.name} is your new CEO.`); say("ceo", "New boss in the building!"); }
   catch (e) { toastError(e); }
   finally { busy(btn, false); }
+}
+
+// ------------------------------------------------------------------ your Mind directs
+// A player's Hello Minds agent can make the agency's final calls through its
+// own API (Pixel Agency: /v1/director). Linking proves the player's Minds
+// sign-in; the API then issues a director key, shown here once, which the
+// player gives their Mind together with the director spec.
+let mindsApi = null;
+async function loadMinds() {
+  if (mindsApi) return mindsApi;
+  if (!state.cfg.mindsClientId) throw new Error("Linking a Mind isn't available here.");
+  const mod = await import("../minds/kult-minds.js");
+  mindsApi = mod.init({ clientId: state.cfg.mindsClientId, redirectUri: `${location.origin}/minds/callback` });
+  return mindsApi;
+}
+
+async function loadMindStatus() {
+  try { state.mind = await api.mindStatus(); if (state.view === "agency") renderView("agency"); }
+  catch (e) { if (e.status !== 404) toastError(e); }
+}
+
+function applyMindLink(out) {
+  state.mind = { ...(state.mind || {}), mind: out.mind };
+  state.mindsList = out.mind?.mindId ? null : out.minds;
+  if (out.key) state.mindKey = out.key.key;
+}
+
+async function connectMind(btn) {
+  busy(btn, true, "Opening Hello Minds…");
+  try { await (await loadMinds()).signIn(); } // leaves the page
+  catch (e) { toastError(e); busy(btn, false); }
+}
+
+async function finishMindsLink() {
+  try {
+    const minds = await loadMinds();
+    await minds.handleRedirect(mindsCallback);
+    const token = await minds.accessToken();
+    if (!token) throw new Error("Hello Minds sign-in didn't finish. Try again.");
+    applyMindLink(await api.linkMind(token));
+    setView("agency");
+    loadMindStatus();
+    toast(state.mind?.mind?.mindId ? `${state.mind.mind.name || "Your Mind"} now directs ${state.agency.name}.` : "Minds account linked. Choose which Mind directs.");
+  } catch (e) { toastError(e); }
+}
+
+async function chooseMind(mindId, btn) {
+  busy(btn, true, "…");
+  try {
+    const token = await (await loadMinds()).accessToken();
+    if (!token) throw new Error("Your Hello Minds sign-in expired. Link your Mind again.");
+    applyMindLink(await api.linkMind(token, mindId));
+    await loadMindStatus();
+    toast(`${state.mind?.mind?.name || "Your Mind"} now directs ${state.agency.name}.`);
+  } catch (e) { toastError(e); busy(btn, false); }
+}
+
+async function newMindKey(btn) {
+  busy(btn, true, "…");
+  try { state.mindKey = (await api.newMindKey()).key.key; await loadMindStatus(); toast("New director key ready. Give it to your Mind."); }
+  catch (e) { toastError(e); busy(btn, false); }
+}
+
+async function unlinkMind(btn) {
+  if (!confirm("Unlink your Mind? Its director keys stop working at once. Its career record stays.")) return;
+  busy(btn, true, "…");
+  try {
+    await api.unlinkMind();
+    try { await mindsApi?.signOut(); } catch { /* already out */ }
+    Object.assign(state, { mind: { mind: null, keys: [] }, mindsList: null, mindKey: null });
+    renderView("agency");
+    toast("Your Mind no longer directs the agency.");
+  } catch (e) { toastError(e); busy(btn, false); }
 }
 
 // ------------------------------------------------------------------ boot

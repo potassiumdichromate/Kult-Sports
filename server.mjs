@@ -10,7 +10,10 @@
 //                        which turns a Privy login into an AI Arena token. The
 //                        AI Arena gateway only accepts browser calls from its
 //                        own site, so the exchange runs server to server.
-// - /config.json      -> public settings for the page (Privy app id).
+// - /config.json      -> public settings for the page (Privy app id, Minds client id).
+// - /minds/callback   -> where Hello Minds returns after a player links their Mind.
+//                        Redirected to the game page (one URL, relative assets) with
+//                        the OAuth code and state kept, plus mindsCallback=1.
 
 import { createServer } from "node:http";
 import { readFile, stat } from "node:fs/promises";
@@ -25,7 +28,11 @@ const PUBLIC_CONFIG = JSON.stringify({
   apiUrl: (process.env.PUBLIC_API_URL || "").replace(/\/$/, "") || null,
   privyAppId: process.env.PRIVY_APP_ID || null,
   privyClientId: process.env.PRIVY_CLIENT_ID || null,
-  aiArenaUrl: process.env.AI_ARENA_APP_URL || "https://app.kult.games"
+  aiArenaUrl: process.env.AI_ARENA_APP_URL || "https://app.kult.games",
+  // Hello Minds OAuth client (public id) for "Your Mind directs"; unset hides the feature.
+  mindsClientId: process.env.MINDS_CLIENT_ID || null,
+  // The spec a player's Mind builds its Skill from (must be the public API address).
+  directorSpecUrl: `${(process.env.PUBLIC_API_URL || "").replace(/\/$/, "") || API_URL}/v1/director/openapi.json`
 });
 const MAX_BODY = 64 * 1024;
 const UPSTREAM_TIMEOUT_MS = 90_000; // the API can be cold on Render; analysis takes a few seconds
@@ -108,6 +115,11 @@ createServer(async (req, res) => {
       return await proxy(req, res, `${AI_ARENA_API_URL}/v1/auth/privy`);
     }
     if (p.startsWith("/api/")) return await proxy(req, res, `${API_URL}${p.slice(4)}${url.search}`);
+    if (p === "/minds/callback") {
+      const q = new URLSearchParams(url.search);
+      q.set("mindsCallback", "1");
+      return send(res, 302, undefined, { Location: `/?${q}`, "Cache-Control": "no-store" });
+    }
     if (req.method !== "GET" && req.method !== "HEAD") return json(res, 405, { error: "method_not_allowed", message: "Not allowed" });
     return await serveStatic(req, res, p);
   } catch (e) {

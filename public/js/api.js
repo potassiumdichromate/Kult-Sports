@@ -86,6 +86,12 @@ export function createApi({ onUnauthorized, apiUrl } = {}) {
     lock: (id) => request("POST", `/fixtures/${encodeURIComponent(id)}/prediction/lock`),
     predictions: () => request("GET", "/predictions"),
 
+    // Your Mind directs (a Hello Minds agent makes the final calls; see Pixel Agency's docs).
+    mindStatus: () => request("GET", "/agency/mind"),
+    linkMind: (accessToken, mindId) => request("POST", "/agency/mind", mindId ? { accessToken, mindId } : { accessToken }),
+    newMindKey: () => request("POST", "/agency/mind/keys"),
+    unlinkMind: () => request("DELETE", "/agency/mind"),
+
     leaderboard: (kind, params) => request("GET", `/leaderboards/${kind === "weekly" ? "weekly" : "all-time"}${q(params)}`)
   };
 }

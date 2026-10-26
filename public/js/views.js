@@ -247,10 +247,10 @@ export function renderHistory(root, ctx) {
     head("Track record", "My predictions"),
     !list ? el("p", { class: "muted" }, "Loading…") : !list.length ? el("p", { class: "empty-dash" }, "No predictions yet. Analyse a match to make your first picks.")
       : el("div", { class: "list" }, list.map((p) => {
-        const st = p.status === "SETTLED" ? { cls: "settled", text: `+${fmtPts(p.points)} pts` } : { cls: p.status.toLowerCase(), text: p.status === "DRAFT" ? "Draft" : p.status === "LOCKED" ? (p.autoLocked ? "Auto-locked" : "Locked") : "Void" };
+        const st = p.status === "SETTLED" ? { cls: "settled", text: `+${fmtPts(p.points)} pts` } : { cls: p.status.toLowerCase(), text: p.status === "DRAFT" ? "Draft" : p.status === "LOCKED" ? (p.decidedBy === "mind" ? "Mind's call" : p.autoLocked ? "Auto-locked" : "Locked") : "Void" };
         return el("button", { type: "button", class: "fx-row", onclick: () => ctx.openMatch(p.fixtureId) },
           el("div", { class: "when" }, el("b", {}, fmtDay(p.kickoffAt)), p.leagueName),
-          el("div", { style: "min-width:0" }, el("div", { class: "teams" }, p.match), el("div", { class: "league" }, `${pickText("score", p.picks, fake(p))} · ${pickText("scorer", p.picks, fake(p))}`)),
+          el("div", { style: "min-width:0" }, el("div", { class: "teams" }, p.match), el("div", { class: "league" }, `${pickText("score", p.picks, fake(p))} · ${pickText("scorer", p.picks, fake(p))}${p.decidedBy === "mind" ? " · decided by your Mind" : ""}`)),
           el("span", { class: `status ${st.cls}` }, st.text),
           el("span", { class: "btn small go" }, p.status === "SETTLED" ? `${p.exactHits} exact` : "Open"));
       })));
@@ -305,6 +305,7 @@ export function renderAgency(root, ctx) {
       el("div", { class: "ceo-card" }, el("span", { class: "crown", "aria-hidden": "true" }, "♛"),
         el("div", { style: "min-width:0;flex:1" }, el("b", {}, a.ceo.name), clan(a.ceo.clan), el("div", { class: "muted small" }, ceoAgent?.archetype ? `${ceoAgent.archetype.toLowerCase()} · ELO ${ceoAgent.eloRating ?? "?"}` : "")),
         state.me?.agents?.length > 1 ? el("div", { class: "row" }, picker, el("button", { type: "button", class: "btn small", onclick: (e) => ctx.changeCeo(picker.value, e.currentTarget) }, "Make CEO")) : null)),
+    mindSection(ctx),
     section("Ledger", "last 100 entries",
       !ledger ? el("p", { class: "muted" }, "Loading…") : !ledger.entries.length ? el("p", { class: "empty-dash" }, "No credit activity yet.")
         : el("table", { class: "ledger" },
@@ -316,6 +317,60 @@ export function renderAgency(root, ctx) {
             el("td", { class: "amt" }, fmtCredits(e.balanceAfter))))))),
     el("div", { class: "actions" }, el("button", { type: "button", class: "btn ghost sign-out" }, "Sign out")));
   root.querySelector(".sign-out").addEventListener("click", ctx.signOut);
+}
+
+// ---------------------------------------------------------------- your Mind directs
+// What the player sends their Mind (Minds' Skill guide: describe it, paste the API docs).
+export const mindMessage = (specUrl) => [
+  `Build me a Skill called "Kult Sports director" from this API: ${specUrl}`,
+  "Every call needs the header X-Director-Key with my director key, which I'm giving you as a connection.",
+  "You direct my football agency in Kult Sports. Follow the daily routine in the API description:",
+  "check your record, manage my analysts, and decide each match before the record locks, with your reasoning and sources.",
+  "After the results, tell me how the agency did and what you learned."
+].join("\n");
+
+function copyBlock(label, value, note) {
+  const pre = el("pre", { class: "copy-text" }, value);
+  return el("div", { class: "copy-block" },
+    el("div", { class: "row" }, el("b", { class: "small" }, label),
+      el("button", { type: "button", class: "btn small", onclick: (e) => {
+        const b = e.currentTarget;
+        navigator.clipboard?.writeText(value).then(() => { b.textContent = "Copied"; setTimeout(() => { b.textContent = "Copy"; }, 1500); }).catch(() => { b.textContent = "Select and copy"; });
+      } }, "Copy")),
+    pre,
+    note ? el("p", { class: "muted small" }, note) : null);
+}
+
+function mindSection(ctx) {
+  const { state } = ctx;
+  if (!state.cfg?.mindsClientId || ctx.api?.demo) return null;
+  const title = (small, ...kids) => section("Your Mind", small, ...kids);
+  if (!state.mind) return title("Hello Minds", el("p", { class: "muted" }, "Loading…"));
+  const link = state.mind.mind;
+  if (!link) {
+    return title("Hello Minds",
+      el("p", {}, "Let your Hello Minds agent direct this agency. It reads your analysts' reports, hires and fires, researches every match and makes the final call."),
+      el("p", { class: "muted small" }, "Every call your Mind makes goes on its career record: anchored on 0G before kickoff, graded after the match, and compared with the 0G baseline. The record follows your Mind wherever it plays."),
+      el("div", { class: "actions" }, el("button", { type: "button", class: "btn primary", onclick: (e) => ctx.connectMind(e.currentTarget) }, "Let your Mind direct")));
+  }
+  if (!link.mindId) {
+    const list = state.mindsList || [];
+    return title("choose who directs",
+      list.length
+        ? el("div", { class: "actions column" }, list.map((m) => el("button", { type: "button", class: "btn", onclick: (e) => ctx.chooseMind(m.mindId, e.currentTarget) }, m.name || m.mindId)))
+        : el("div", { class: "actions" }, el("button", { type: "button", class: "btn primary", onclick: (e) => ctx.connectMind(e.currentTarget) }, "Sign in with Minds to choose")));
+  }
+  const active = (state.mind.keys || []).filter((k) => !k.revokedAt).length;
+  return title("directs this agency",
+    el("div", { class: "ceo-card" }, el("span", { class: "crown", "aria-hidden": "true" }, "✦"),
+      el("div", { style: "min-width:0;flex:1" }, el("b", {}, link.name || "Your Mind"), el("div", { class: "muted small" }, `Career record: ${link.agentId}`))),
+    state.mindKey
+      ? copyBlock("Director key", state.mindKey, "Shown once. Give it to your Mind with the message below; anyone holding it can direct your agency.")
+      : el("p", { class: "muted small" }, active ? `${active} active director key${active === 1 ? "" : "s"}. Lost it? Make a new one.` : "No active director key. Make one for your Mind."),
+    copyBlock("Message for your Mind", mindMessage(state.cfg.directorSpecUrl)),
+    el("div", { class: "actions" },
+      el("button", { type: "button", class: "btn", onclick: (e) => ctx.newMindKey(e.currentTarget) }, "New key"),
+      el("button", { type: "button", class: "btn ghost", onclick: (e) => ctx.unlinkMind(e.currentTarget) }, "Unlink")));
 }
 
 // ---------------------------------------------------------------- analyst card

@@ -486,3 +486,8 @@ body.has-art .logo { background: none; box-shadow: none; }
 .logo.art { background: none; box-shadow: none; }
 .inline-ico { width: 16px; height: 16px; image-rendering: pixelated; vertical-align: -3px; margin-right: 6px; }
 #log li .feed-ico { width: 14px; height: 14px; margin-top: 2px; image-rendering: pixelated; }
+
+/* Your Mind directs: copyable key and message */
+.copy-block { margin-top: 12px; }
+.copy-block .row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.copy-text { margin: 6px 0 0; padding: 8px 10px; background: #071510; border: 2px solid var(--line, #1f3a2c); color: var(--text, #e8f5ec); font-size: 13px; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 180px; overflow: auto; }
