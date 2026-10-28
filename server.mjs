@@ -11,6 +11,8 @@
 //                        AI Arena gateway only accepts browser calls from its
 //                        own site, so the exchange runs server to server.
 // - /config.json      -> public settings for the page (Privy app id, Minds client id).
+// - /arena/minds/*    -> AI Arena's /v1/marketplace/minds/link and /mine, so the
+//                        player's Mind is linked to their agent too (one KULT key).
 // - /minds/callback   -> where Hello Minds returns after a player links their Mind.
 //                        Redirected to the game page (one URL, relative assets) with
 //                        the OAuth code and state kept, plus mindsCallback=1.
@@ -32,7 +34,9 @@ const PUBLIC_CONFIG = JSON.stringify({
   // Hello Minds OAuth client (public id) for "Your Mind directs"; unset hides the feature.
   mindsClientId: process.env.MINDS_CLIENT_ID || null,
   // The spec a player's Mind builds its Skill from (must be the public API address).
-  directorSpecUrl: `${(process.env.PUBLIC_API_URL || "").replace(/\/$/, "") || API_URL}/v1/director/openapi.json`
+  directorSpecUrl: `${(process.env.PUBLIC_API_URL || "").replace(/\/$/, "") || API_URL}/v1/director/openapi.json`,
+  // The AI Arena Mind API: talking to other agents, negotiating, relationships.
+  mindApiSpecUrl: `${AI_ARENA_API_URL}/v1/marketplace/mind/openapi.json`
 });
 const MAX_BODY = 64 * 1024;
 const UPSTREAM_TIMEOUT_MS = 90_000; // the API can be cold on Render; analysis takes a few seconds
@@ -115,6 +119,10 @@ createServer(async (req, res) => {
       return await proxy(req, res, `${AI_ARENA_API_URL}/v1/auth/privy`);
     }
     if (p.startsWith("/api/")) return await proxy(req, res, `${API_URL}${p.slice(4)}${url.search}`);
+    if (p === "/arena/minds/link" || p === "/arena/minds/mine") {
+      if (req.method !== (p.endsWith("link") ? "POST" : "GET")) return json(res, 405, { error: "method_not_allowed", message: "Not allowed" });
+      return await proxy(req, res, `${AI_ARENA_API_URL}/v1/marketplace/minds/${p.slice("/arena/minds/".length)}`);
+    }
     if (p === "/minds/callback") {
       const q = new URLSearchParams(url.search);
       q.set("mindsCallback", "1");

@@ -321,9 +321,13 @@ export function renderAgency(root, ctx) {
 
 // ---------------------------------------------------------------- your Mind directs
 // What the player sends their Mind (Minds' Skill guide: describe it, paste the API docs).
-export const mindMessage = (specUrl) => [
+export const mindMessage = (specUrl, mindApiUrl) => [
   `Build me a Skill called "Kult Sports director" from this API: ${specUrl}`,
-  "Every call needs the header X-Director-Key with my director key, which I'm giving you as a connection.",
+  ...(mindApiUrl
+    ? [`And a Skill called "KULT agent" from this API: ${mindApiUrl}`,
+       "Both take the header X-Mind-Key with my KULT key, which I'm giving you as a connection.",
+       "With the KULT agent Skill you talk to other agents, negotiate and build rivalries and alliances as my agent."]
+    : ["Every call needs the header X-Director-Key with my director key, which I'm giving you as a connection."]),
   "You direct my football agency in Kult Sports. Follow the daily routine in the API description:",
   "check your record, manage my analysts, and decide each match before the record locks, with your reasoning and sources.",
   "After the results, tell me how the agency did and what you learned."
@@ -365,9 +369,11 @@ function mindSection(ctx) {
     el("div", { class: "ceo-card" }, el("span", { class: "crown", "aria-hidden": "true" }, "✦"),
       el("div", { style: "min-width:0;flex:1" }, el("b", {}, link.name || "Your Mind"), el("div", { class: "muted small" }, `Career record: ${link.agentId}`))),
     state.mindKey
-      ? copyBlock("Director key", state.mindKey, "Shown once. Give it to your Mind with the message below; anyone holding it can direct your agency.")
+      ? copyBlock(state.mindKeyKind === "kult" ? "Your KULT key" : "Director key", state.mindKey, state.mindKeyKind === "kult"
+        ? "Shown once. One key for your Mind across KULT: it directs this agency and speaks for your agent. Keep it secret."
+        : "Shown once. Give it to your Mind with the message below; anyone holding it can direct your agency.")
       : el("p", { class: "muted small" }, active ? `${active} active director key${active === 1 ? "" : "s"}. Lost it? Make a new one.` : "No active director key. Make one for your Mind."),
-    copyBlock("Message for your Mind", mindMessage(state.cfg.directorSpecUrl)),
+    copyBlock("Message for your Mind", mindMessage(state.cfg.directorSpecUrl, state.mindKeyKind === "kult" ? state.cfg.mindApiSpecUrl : null)),
     el("div", { class: "actions" },
       el("button", { type: "button", class: "btn", onclick: (e) => ctx.newMindKey(e.currentTarget) }, "New key"),
       el("button", { type: "button", class: "btn ghost", onclick: (e) => ctx.unlinkMind(e.currentTarget) }, "Unlink")));

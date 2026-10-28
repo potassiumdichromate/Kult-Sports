@@ -624,7 +624,32 @@ async function loadMindStatus() {
 function applyMindLink(out) {
   state.mind = { ...(state.mind || {}), mind: out.mind };
   state.mindsList = out.mind?.mindId ? null : out.minds;
-  if (out.key) state.mindKey = out.key.key;
+  if (out.key) { state.mindKey = out.key.key; state.mindKeyKind = "director"; }
+}
+
+// A fresh AI Arena token: renewed through Privy when possible, else the one
+// the game was entered with while it is still valid.
+async function freshArenaToken() {
+  try {
+    if (privyApi?.authenticated) return await api.arenaTokenFromPrivy((await privyApi.tokens()).accessToken);
+  } catch { /* fall back to the stored one */ }
+  return api.storedArenaToken();
+}
+
+// Link the directing Mind to the agency's CEO agent in AI Arena too, so one
+// KULT key lets it direct here and talk, negotiate and build relationships as
+// that agent. Best effort: without a fresh AI Arena token the game-only key stands.
+async function linkMindToAgent(accessToken) {
+  const mindId = state.mind?.mind?.mindId;
+  const arenaToken = mindId ? await freshArenaToken() : null;
+  if (!mindId || !arenaToken) return;
+  try {
+    const out = await api.arenaLinkMind(arenaToken, state.agency.ceo.agentId, accessToken, mindId);
+    state.mindAgent = out.linked;
+    if (out.key) { state.mindKey = out.key.key; state.mindKeyKind = "kult"; }
+  } catch (e) {
+    toast(`Your Mind directs the agency. It couldn't be linked to ${state.agency.ceo.name} in AI Arena: ${e.message}`, true);
+  }
 }
 
 async function connectMind(btn) {
@@ -640,6 +665,7 @@ async function finishMindsLink() {
     const token = await minds.accessToken();
     if (!token) throw new Error("Hello Minds sign-in didn't finish. Try again.");
     applyMindLink(await api.linkMind(token));
+    await linkMindToAgent(token);
     setView("agency");
     loadMindStatus();
     toast(state.mind?.mind?.mindId ? `${state.mind.mind.name || "Your Mind"} now directs ${state.agency.name}.` : "Minds account linked. Choose which Mind directs.");
@@ -652,6 +678,7 @@ async function chooseMind(mindId, btn) {
     const token = await (await loadMinds()).accessToken();
     if (!token) throw new Error("Your Hello Minds sign-in expired. Link your Mind again.");
     applyMindLink(await api.linkMind(token, mindId));
+    await linkMindToAgent(token);
     await loadMindStatus();
     toast(`${state.mind?.mind?.name || "Your Mind"} now directs ${state.agency.name}.`);
   } catch (e) { toastError(e); busy(btn, false); }
@@ -659,7 +686,7 @@ async function chooseMind(mindId, btn) {
 
 async function newMindKey(btn) {
   busy(btn, true, "…");
-  try { state.mindKey = (await api.newMindKey()).key.key; await loadMindStatus(); toast("New director key ready. Give it to your Mind."); }
+  try { state.mindKey = (await api.newMindKey()).key.key; state.mindKeyKind = "director"; await loadMindStatus(); toast("New director key ready. Give it to your Mind."); }
   catch (e) { toastError(e); busy(btn, false); }
 }
 

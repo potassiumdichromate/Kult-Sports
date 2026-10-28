@@ -4,6 +4,10 @@
 // signed in.
 
 const KEY = "kultsports.session";
+// The AI Arena token the game was entered with, kept briefly so the player's
+// Mind can also be linked to their agent in AI Arena (it expires in ~15 minutes).
+const ARENA_KEY = "kultsports.arena";
+const ARENA_TOKEN_MAX_AGE_MS = 13 * 60_000;
 
 export class ApiError extends Error {
   constructor(status, body, correlationId) {
@@ -49,11 +53,27 @@ export function createApi({ onUnauthorized, apiUrl } = {}) {
   return {
     demo: false,
     hasSession: () => Boolean(session),
-    signOut() { session = null; try { sessionStorage.removeItem(KEY); } catch { /* ignore */ } },
+    signOut() { session = null; try { sessionStorage.removeItem(KEY); sessionStorage.removeItem(ARENA_KEY); } catch { /* ignore */ } },
+    /** The AI Arena token if it is still fresh, else null. */
+    storedArenaToken() {
+      try { const t = JSON.parse(sessionStorage.getItem(ARENA_KEY) || "null"); return t && Date.now() - t.at < ARENA_TOKEN_MAX_AGE_MS ? t.token : null; }
+      catch { return null; }
+    },
+    /** Links the Mind to an AI Arena agent (server.mjs forwards to AI Arena): one KULT key for every product. */
+    async arenaLinkMind(arenaToken, agentId, accessToken, mindId) {
+      let res;
+      try {
+        res = await fetch("/arena/minds/link", { method: "POST", headers: { "content-type": "application/json", authorization: `Bearer ${arenaToken}` }, body: JSON.stringify({ agentId, accessToken, ...(mindId && { mindId }) }) });
+      } catch { throw new ApiError(0, { message: "AI Arena can't be reached right now." }); }
+      const data = await res.json().catch(() => null);
+      if (!res.ok) throw new ApiError(res.status, { message: data?.error || "AI Arena could not link your Mind." });
+      return data;
+    },
 
     // AI Arena token (from the Kult browser, or a Privy login) -> game session.
     async startSession(aiArenaToken) {
       const out = await request("POST", "/auth/session", { aiArenaToken }, { auth: false });
+      try { sessionStorage.setItem(ARENA_KEY, JSON.stringify({ token: aiArenaToken, at: Date.now() })); } catch { /* private mode */ }
       session = { token: out.token, expiresAt: out.expiresAt };
       try { sessionStorage.setItem(KEY, JSON.stringify(session)); } catch { /* private mode */ }
       return out;
