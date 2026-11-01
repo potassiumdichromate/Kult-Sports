@@ -18,6 +18,7 @@
 //                        the OAuth code and state kept, plus mindsCallback=1.
 
 import { createServer } from "node:http";
+import { readFileSync } from "node:fs";
 import { readFile, stat } from "node:fs/promises";
 import { extname, join, normalize, sep } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -38,6 +39,13 @@ const PUBLIC_CONFIG = JSON.stringify({
   // The AI Arena Mind API: talking to other agents, negotiating, relationships.
   mindApiSpecUrl: `${AI_ARENA_API_URL}/v1/marketplace/mind/openapi.json`
 });
+// The page links its CSS and scripts under /v/<build>/, so each deploy has new
+// URLs and no cache in front (Cloudflare's browser TTL included) can keep an old
+// office; the scripts' relative imports follow the same prefix. The page itself
+// is never cached.
+const BUILD = (process.env.RENDER_GIT_COMMIT || "").slice(0, 12) || Date.now().toString(36);
+const PAGE = readFileSync(join(ROOT, "index.html"), "utf8")
+  .replace(/(<(?:link|script)\b[^>]*\b(?:href|src)=")(?![a-z]+:|\/|\?|#)([^"]+")/g, `$1v/${BUILD}/$2`);
 const MAX_BODY = 64 * 1024;
 const UPSTREAM_TIMEOUT_MS = 90_000; // the API can be cold on Render; analysis takes a few seconds
 
@@ -90,6 +98,9 @@ async function proxy(req, res, target) {
 async function serveStatic(req, res, pathname) {
   let rel = decodeURIComponent(pathname);
   if (rel.endsWith("/")) rel += "index.html";
+  if (rel === "/index.html") return send(res, 200, req.method === "HEAD" ? undefined : PAGE, { "Content-Type": TYPES[".html"], "Cache-Control": "no-store" });
+  const v = /^\/v\/([^/]+)(\/.*)$/.exec(rel);
+  if (v) rel = v[2];
   const file = normalize(join(ROOT, rel));
   if (!file.startsWith(ROOT + sep) && file !== ROOT) return send(res, 403, "Forbidden");
   let info;
@@ -100,9 +111,9 @@ async function serveStatic(req, res, pathname) {
     return send(res, 404, "Not found", { "Content-Type": "text/plain" });
   }
   const type = TYPES[extname(file).toLowerCase()] || "application/octet-stream";
-  // Hashed Privy chunks never change; everything else revalidates (ETag) so a
-  // deploy shows up on the next load.
-  const cache = /[\\/]privy[\\/]chunks[\\/]/.test(file) ? "public, max-age=31536000, immutable" : "no-cache";
+  // Hashed Privy chunks and this build's versioned files never change;
+  // everything else revalidates (ETag).
+  const cache = /[\\/]privy[\\/]chunks[\\/]/.test(file) || v?.[1] === BUILD ? "public, max-age=31536000, immutable" : "no-cache";
   const etag = `W/"${info.size.toString(16)}-${Math.floor(info.mtimeMs).toString(16)}"`;
   if (req.headers["if-none-match"] === etag) return send(res, 304, undefined, { ETag: etag, "Cache-Control": cache });
   send(res, 200, req.method === "HEAD" ? undefined : await readFile(file), { "Content-Type": type, "Cache-Control": cache, ETag: etag });
