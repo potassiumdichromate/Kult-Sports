@@ -83,22 +83,22 @@ export function pickText(market, picks, f) {
 export const isLive = (status) => ["1H", "HT", "2H", "ET", "BT", "P", "LIVE"].includes(status);
 export const isFinished = (status) => ["FT", "AET", "PEN"].includes(status);
 
-// Pixel icons from rows of '#'.
-export function pixelIcon(rows, cls = "ico") {
+// Line icons (24x24, stroked in the current colour).
+export const ICONS = {
+  office: '<path d="M3 21h18"/><path d="M5 21V8l7-5 7 5v13"/><path d="M10 21v-5h4v5"/><path d="M9 10h.01M15 10h.01"/>',
+  matches: '<circle cx="12" cy="12" r="9"/><path d="M12 7l4 3-1.5 4.5h-5L8 10z"/><path d="M12 3v4M16 10l4.5-1.5M14.5 14.5l2.5 4M9.5 14.5l-2.5 4M8 10 3.5 8.5"/>',
+  talent: '<circle cx="9" cy="8" r="4"/><path d="M2 21v-1a7 7 0 0 1 14 0v1"/><path d="M19 8v6M16 11h6"/>',
+  history: '<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1"/><path d="M9 10h6M9 14h6M9 18h3"/>',
+  leaders: '<path d="M8 21h8M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/>',
+  agency: '<path d="M12 2 4 5v6c0 5 3.5 9 8 11 4.5-2 8-6 8-11V5z"/><path d="m9 12 2 2 4-4"/>',
+  emblem: '<path d="M12 2 4 5v6c0 5 3.5 9 8 11 4.5-2 8-6 8-11V5z"/><circle cx="12" cy="11" r="3.5"/><path d="M12 7.5v1.2M8.6 10.2l1.2.4M15.4 10.2l-1.2.4"/>',
+  whistle: '<path d="M10 9h11v4a6 6 0 1 1-11-3.3"/><circle cx="8" cy="15" r="2"/><path d="M14 9V6"/><path d="M3 6l3 2"/>',
+  stopwatch: '<circle cx="12" cy="14" r="8"/><path d="M12 14V10M10 2h4M12 2v4M19 7l1.5-1.5"/>',
+  ball: '<circle cx="12" cy="12" r="9"/><path d="M12 7l4 3-1.5 4.5h-5L8 10z"/>'
+};
+export function lineIcon(name, cls = "ico") {
   const ns = "http://www.w3.org/2000/svg", svg = document.createElementNS(ns, "svg");
-  svg.setAttribute("viewBox", `0 0 ${rows[0].length} ${rows.length}`);
-  svg.setAttribute("class", cls); svg.setAttribute("aria-hidden", "true"); svg.setAttribute("shape-rendering", "crispEdges");
-  rows.forEach((row, y) => [...row].forEach((c, x) => {
-    if (c !== "#") return;
-    const r = document.createElementNS(ns, "rect");
-    r.setAttribute("x", x); r.setAttribute("y", y); r.setAttribute("width", 1); r.setAttribute("height", 1);
-    svg.append(r);
-  }));
+  svg.setAttribute("viewBox", "0 0 24 24"); svg.setAttribute("class", cls); svg.setAttribute("aria-hidden", "true");
+  svg.innerHTML = ICONS[name] || ICONS.ball;
   return svg;
 }
-export const ICONS = {
-  ball: ["....####....", "..##.##.##..", ".#..####..#.", ".#.#....#.#.", "#.#......#.#", "####....####", "####....####", "#.#......#.#", ".#.#....#.#.", ".#..####..#.", "..##.##.##..", "....####...."],
-  talent: ["....###.....", "...#####....", "...#####....", "....###.....", "..#######...", ".#########..", ".#########.#", ".########.###", "..#######..#.", "............", "............", "............"].map((r) => r.slice(0, 12)),
-  history: ["..########..", "..#......#..", "####....####", "#..........#", "#.######...#", "#..........#", "#.#####....#", "#..........#", "#.######...#", "#..........#", "############", "............"],
-  trophy: ["############", "#.########.#", "#.########.#", ".#.######.#.", "..########..", "...######...", "....####....", ".....##.....", ".....##.....", "...######...", "...######...", "............"]
-};

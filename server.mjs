@@ -44,7 +44,7 @@ const UPSTREAM_TIMEOUT_MS = 90_000; // the API can be cold on Render; analysis t
 const TYPES = {
   ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".mjs": "text/javascript; charset=utf-8",
   ".css": "text/css; charset=utf-8", ".json": "application/json; charset=utf-8", ".png": "image/png",
-  ".svg": "image/svg+xml", ".ico": "image/x-icon", ".webp": "image/webp", ".woff2": "font/woff2"
+  ".svg": "image/svg+xml", ".ico": "image/x-icon", ".webp": "image/webp", ".woff2": "font/woff2", ".glb": "model/gltf-binary"
 };
 
 // The page URL can carry the player's AI Arena token (?jwt=...): never leak it

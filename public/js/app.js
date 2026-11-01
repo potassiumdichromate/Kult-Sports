@@ -4,7 +4,8 @@
 import { createApi } from "./api.js";
 import { createDemoApi } from "./demo.js";
 import { Office, SPECIALTY_COLORS } from "./world.js";
-import { $, el, show, toast, toastError, busy, fmtPts, fmtCredits, fmtCountdown, MARKET_LABEL, outcomeText, ICONS, pixelIcon } from "./ui.js";
+import { archetypePortrait } from "./office3d.js";
+import { $, el, show, toast, toastError, busy, fmtPts, fmtCredits, fmtCountdown, MARKET_LABEL, outcomeText, lineIcon } from "./ui.js";
 import * as V from "./views.js";
 
 const params = new URLSearchParams(location.search);
@@ -31,7 +32,7 @@ const state = {
   mind: null, mindsList: null, mindKey: null
 };
 const canvas = $("office"), office = new Office(canvas);
-let scale = 1, artUrl = (f) => `art/${f}`;
+if (new URLSearchParams(location.search).has("debug")) window.ks = { office };
 
 // ------------------------------------------------------------------ shared context for views
 const ctx = {
@@ -60,10 +61,7 @@ const ctx = {
 function fit() {
   const box = $("stage").getBoundingClientRect();
   if (!box.width || !box.height) return;
-  scale = Math.max(0.4, Math.min(box.width / office.W, box.height / office.H));
-  office.setPixelScale(scale * (window.devicePixelRatio || 1));
-  canvas.style.width = `${Math.round(office.W * scale)}px`;
-  canvas.style.height = `${Math.round(office.H * scale)}px`;
+  office.resize(box.width, box.height);
 }
 new ResizeObserver(fit).observe($("stage"));
 
@@ -113,7 +111,7 @@ canvas.addEventListener("pointermove", (e) => {
 });
 canvas.addEventListener("pointerleave", () => { $("tooltip").hidden = true; office.hoverDesk = -1; });
 canvas.addEventListener("click", (e) => {
-  if (state.analysing) return;
+  if (state.analysing || office.dragged) return;
   const [x, y] = toOffice(e), p = office.hit(x, y);
   if (p?.isCeo) return setView("agency");
   if (p) return openAnalyst(p.id);
@@ -121,44 +119,21 @@ canvas.addEventListener("click", (e) => {
 });
 
 // ------------------------------------------------------------------ feed
-// icon: an art icon name (e.g. "whistle") shown in place of the colour dot.
+// icon: a line icon name (e.g. "whistle") shown in place of the colour dot.
 function log(who, text, color = "var(--accent)", cls = "", icon = null) {
   const list = $("log");
   list.querySelector(".empty")?.remove();
-  const src = icon && state.sportsIcon?.(icon);
-  const mark = src ? el("img", { class: "feed-ico", src, alt: "" }) : el("span", { class: "dot" });
+  const mark = icon ? lineIcon(icon, "feed-ico") : el("span", { class: "dot" });
   list.append(el("li", { class: cls, style: `--c:${color}` }, mark, el("div", {}, el("span", { class: "who" }, who), text)));
   while (list.children.length > 80) list.firstChild.remove();
   list.scrollTop = list.scrollHeight;
 }
 const logSystem = (text) => log("Agency", text, "var(--gold)", "system");
 
-// ------------------------------------------------------------------ art
-async function loadArt() {
-  try {
-    const manifest = await fetch(`art/manifest.json?t=${Date.now()}`, { cache: "no-store" }).then((r) => r.json());
-    artUrl = (f) => `art/${f}${manifest.rev ? `?v=${manifest.rev}` : ""}`;
-    const files = [...new Set([manifest.background, ...Object.values(manifest.sprites || {}), ...Object.values(manifest.characters || {}), ...Object.values(manifest.icons || {}), ...Object.values(manifest.sportsIcons || {})].map((x) => x?.file).filter(Boolean))];
-    const images = {};
-    await Promise.all(files.map((f) => new Promise((resolve) => { const img = new Image(); img.onload = () => { images[f] = img; resolve(); }; img.onerror = resolve; img.src = artUrl(f); })));
-    office.useArt(manifest, images, artUrl);
-    state.manifest = manifest;
-    const icon = (name) => (manifest.icons?.[name] && images[manifest.icons[name].file] ? artUrl(manifest.icons[name].file) : null);
-    // Kult Sports icons (scripts/import-icons.mjs), falling back to pixel SVGs.
-    const sports = (name) => (manifest.sportsIcons?.[name] && images[manifest.sportsIcons[name].file] ? artUrl(manifest.sportsIcons[name].file) : null);
-    state.sportsIcon = sports;
-    const FALLBACK = { matches: "ball", leaders: "trophy", agency: "history" };
-    for (const slot of document.querySelectorAll(".ico-slot")) {
-      const name = slot.dataset.icon, src = sports(name) || icon(name);
-      slot.replaceWith(src ? el("img", { class: "ico", src, alt: "" }) : pixelIcon(ICONS[name] || ICONS[FALLBACK[name]] || ICONS.ball));
-    }
-    const emblem = sports("emblem");
-    if (emblem) { const logo = document.querySelector(".logo"); logo.replaceChildren(el("img", { src: emblem, alt: "" })); logo.classList.add("art"); }
-    const coin = icon("coin");
-    if (coin) for (const c of document.querySelectorAll(".coin")) c.replaceWith(el("img", { class: "coin-img", src: coin, alt: "" }));
-  } catch (e) {
-    console.warn("[kult-sports] art not loaded", e);
-  }
+// ------------------------------------------------------------------ icons
+function setupIcons() {
+  for (const slot of document.querySelectorAll(".ico-slot")) slot.replaceWith(lineIcon(slot.dataset.icon));
+  document.querySelector(".logo")?.replaceChildren(lineIcon("emblem", "logo-ico"));
 }
 
 // ------------------------------------------------------------------ sign-in
@@ -249,9 +224,11 @@ function showFound(agents) {
   $("found-player").textContent = state.me.player?.username || state.me.player?.walletAddress || "your KULT account";
   const list = $("found-agents");
   state.ceoPick = agents[0];
+  // The archetype's 3D model, rendered once it loads.
   const portrait = (a) => {
-    const m = state.manifest?.ceo?.[String(a.archetype || "hybrid").toLowerCase()] || state.manifest?.ceo?.hybrid;
-    return m?.portrait ? el("img", { src: artUrl(m.portrait), alt: "" }) : el("span", { class: "ph" });
+    const ph = el("span", { class: "ph" });
+    archetypePortrait("models/", a.archetype).then((c) => { if (c) ph.replaceWith(c); });
+    return ph;
   };
   list.replaceChildren(...agents.map((a) => {
     const b = el("button", { type: "button", class: "ceo-pick agent-pick", "aria-pressed": a === state.ceoPick ? "true" : "false", onclick: () => {
@@ -707,7 +684,7 @@ async function boot() {
   try { state.cfg = await fetch("/config.json", { cache: "no-store" }).then((r) => (r.ok ? r.json() : {})); } catch { state.cfg = {}; }
   api ??= createApi({ apiUrl: state.cfg.apiUrl, onUnauthorized: () => sessionExpired() });
   ctx.api = api;
-  await loadArt();
+  setupIcons();
   try {
     if (api.demo) return enter(await api.startSession("demo"));
     if (handoff) return enter(await api.startSession(handoff));

@@ -1,6 +1,6 @@
 # Kult Sports
 
-The Kult Sports web game: an isometric pixel-art football analysis agency.
+The Kult Sports web game: a glowing 3D isometric football analysis agency.
 Your AI Arena agent is the CEO, analysts read every match, and real results
 score points on the weekly and all-time leaderboards. It is built on the
 Pixel Agency API (repo: potassiumdichromate/Kult-League) following
@@ -82,13 +82,15 @@ The Privy dashboard must list this site's origin as allowed.
 |---|---|
 | `public/js/app.js` | Sign-in, the office, flows (analysis show, picks, hiring) |
 | `public/js/views.js` | Screens: matches, match room and pick editor, talent, history, leaderboards, agency, analyst card |
-| `public/js/world.js` | The isometric office renderer (desks follow the agency level, the pitch rug, the match screen, the KULT SPORTS neon sign) |
+| `public/js/world.js` | The 3D office (desks follow the agency level, the pitch rug, the match screen, the KULT SPORTS neon sign, + Hire tags) |
+| `public/js/office3d.js` | The three.js office scene, a copy of Kult Create's; keep the two in sync |
+| `public/models/` | The CEO models, one per AI Arena archetype (from Kult World) |
 | `public/js/api.js` | API client |
 | `public/js/demo.js` | The offline demo API |
-| `public/art/` | Office art (from Kult Create); `node scripts/recolor.mjs` recolours the room from `art-source/` |
+| `public/art/` | The old pixel-art office, no longer used by the 3D office |
 | `privy-login/` | The Privy login bundle source |
 | `minds-login/` | The Hello Minds sign-in bundle source (Minds Connect) |
-| `scripts/import-icons.mjs` | Imports the icon sheet (a 3x3 ChatGPT sheet: office, matches, talent, history, leaders, agency, emblem, whistle, stopwatch) into `public/art/icon-*.png`: `node scripts/import-icons.mjs path/to/sports-ui.png` |
+| `scripts/import-icons.mjs` | Imports the icon sheet (a 3x3 ChatGPT sheet: office, matches, talent, history, leaders, agency, emblem, whistle, stopwatch) into `public/art/icon-*.png`: `node scripts/import-icons.mjs path/to/sports-ui.png`. The UI now uses the line icons in `public/js/ui.js` instead |
 
 ## Your Mind directs
 

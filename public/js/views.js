@@ -3,7 +3,7 @@
 
 import {
   el, stars, fmtPts, fmtCredits, fmtCountdown, fmtTime, fmtDay, fmtAgo,
-  MARKETS, MARKET_LABEL, MARKET_POINTS, outcomeOf, outcomeText, pickText, isLive, isFinished
+  MARKETS, MARKET_LABEL, MARKET_POINTS, outcomeOf, outcomeText, pickText, isLive, isFinished, lineIcon
 } from "./ui.js";
 import { SPECIALTY_COLORS } from "./world.js";
 
@@ -46,7 +46,7 @@ export function renderConsole(root, ctx) {
     el("div", { class: "next-match" },
       el("p", { class: "eyebrow", style: "margin:0 0 4px" }, `Next match · ${next.leagueName}`),
       el("div", { class: "teams" }, `${next.homeTeam} v ${next.awayTeam}`),
-      el("div", { class: "meta" }, ctx.state.sportsIcon?.("stopwatch") ? el("img", { class: "inline-ico", src: ctx.state.sportsIcon("stopwatch"), alt: "" }) : null, `${fmtDay(next.kickoffAt)} ${fmtTime(next.kickoffAt)} · picks lock in `, el("span", { class: "countdown", "data-until": next.lockAt }, fmtCountdown(Date.parse(next.lockAt) - Date.now())), next.prediction ? el("span", { class: `status ${st.cls}`, style: "margin-left:8px" }, st.text) : null)),
+      el("div", { class: "meta" }, lineIcon("stopwatch", "inline-ico"), `${fmtDay(next.kickoffAt)} ${fmtTime(next.kickoffAt)} · picks lock in `, el("span", { class: "countdown", "data-until": next.lockAt }, fmtCountdown(Date.parse(next.lockAt) - Date.now())), next.prediction ? el("span", { class: `status ${st.cls}`, style: "margin-left:8px" }, st.text) : null)),
     el("div", { class: "console-actions" },
       el("button", { type: "button", class: "btn", onclick: () => ctx.go("matches") }, "All matches"),
       el("button", { type: "button", class: "btn primary", onclick: () => ctx.openMatch(next.fixtureId) }, next.prediction ? "Open match room" : "Analyse this match")));
@@ -136,7 +136,7 @@ export function renderMatchRoom(root, ctx) {
       el("p", { class: "muted small" }, "Worth it after hiring: it replaces the draft and your edits."),
       runBtn(`Run again (${analysesAllowed - analysesUsed} left)`)));
   } else if (p.status === "SETTLED" || p.status === "VOID") {
-    right.push(el("div", { class: "card" }, el("h3", {}, el("span", {}, ctx.state.sportsIcon?.("whistle") ? el("img", { class: "inline-ico", src: ctx.state.sportsIcon("whistle"), alt: "" }) : null, p.status === "VOID" ? "Void" : "Full time"), el("small", {}, p.settledAt ? `settled ${fmtAgo(p.settledAt)}` : "")),
+    right.push(el("div", { class: "card" }, el("h3", {}, el("span", {}, lineIcon("whistle", "inline-ico"), p.status === "VOID" ? "Void" : "Full time"), el("small", {}, p.settledAt ? `settled ${fmtAgo(p.settledAt)}` : "")),
       el("div", { class: "breakdown" }, MARKETS.map((m, i) => {
         const b = p.breakdown?.[m] || { result: "VOID", points: 0 };
         return el("div", { class: `bd ${b.result}`, style: `animation-delay:${i * 0.18}s` },
