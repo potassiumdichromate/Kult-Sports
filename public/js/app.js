@@ -9,7 +9,8 @@ import { $, el, show, toast, toastError, busy, fmtPts, fmtCredits, fmtCountdown,
 import * as V from "./views.js";
 
 const params = new URLSearchParams(location.search);
-const demoMode = params.get("demo");
+// ?demo=1 / ?demo=fresh: the offline demo; ?demo=0: the real game even when the server defaults to the demo.
+const demoMode = params.get("demo") === "0" ? null : params.get("demo");
 // The Kult browser opens the game with the player's AI Arena token in the
 // URL. Take it, then remove it from the address bar and history at once.
 const handoff = params.get("jwt");

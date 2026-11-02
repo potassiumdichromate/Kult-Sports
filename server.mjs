@@ -46,6 +46,9 @@ const PUBLIC_CONFIG = JSON.stringify({
 const BUILD = (process.env.RENDER_GIT_COMMIT || "").slice(0, 12) || Date.now().toString(36);
 const PAGE = readFileSync(join(ROOT, "index.html"), "utf8")
   .replace(/(<(?:link|script)\b[^>]*\b(?:href|src)=")(?![a-z]+:|\/|\?|#)([^"]+")/g, `$1v/${BUILD}/$2`);
+// DEMO_MODE=1 (or "fresh": before founding an agency) opens the offline demo
+// (public/js/demo.js) for every visitor; ?demo=0 still reaches the real game.
+const DEMO = (() => { const v = String(process.env.DEMO_MODE || "").trim().toLowerCase(); return v === "fresh" ? "fresh" : ["1", "true", "on", "yes"].includes(v) ? "1" : null; })();
 const MAX_BODY = 64 * 1024;
 const UPSTREAM_TIMEOUT_MS = 90_000; // the API can be cold on Render; analysis takes a few seconds
 
@@ -140,6 +143,10 @@ createServer(async (req, res) => {
       return send(res, 302, undefined, { Location: `/?${q}`, "Cache-Control": "no-store" });
     }
     if (req.method !== "GET" && req.method !== "HEAD") return json(res, 405, { error: "method_not_allowed", message: "Not allowed" });
+    if (DEMO && (p === "/" || p === "/index.html") && !url.searchParams.has("demo")) {
+      const q = new URLSearchParams(url.search); q.set("demo", DEMO);
+      return send(res, 302, undefined, { Location: `/?${q}`, "Cache-Control": "no-store" });
+    }
     return await serveStatic(req, res, p);
   } catch (e) {
     if (!res.headersSent) json(res, e.status || 500, { error: "server_error", message: e.status ? e.message : "Something went wrong" });

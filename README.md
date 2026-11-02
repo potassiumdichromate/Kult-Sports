@@ -69,6 +69,7 @@ the first deploy:
 | `AI_ARENA_API_URL` | `https://aiarena-gateway.kult.games` | AI Arena gateway, for the Privy exchange |
 | `PRIVY_APP_ID` | (unset: Privy login hidden) | The shared KULT Privy app, the one AI Arena verifies |
 | `PRIVY_CLIENT_ID` | | Optional Privy client id |
+| `DEMO_MODE` | (unset) | `1` (or `fresh`) sends every visitor to the offline demo, `?demo=1` (or `?demo=fresh`); `?demo=0` still opens the real game |
 | `MINDS_CLIENT_ID` | (unset: "Your Mind" hidden) | Hello Minds OAuth client id (public), for letting a player's Mind direct their agency. Register `https://<this site>/minds/callback` as its redirect URI and this site as an authorized origin, with scopes `email` and `minds:list`. |
 | `AI_ARENA_APP_URL` | `https://app.kult.games` | "Create an agent" link |
 | `FRAME_ANCESTORS` | (unset) | Optional CSP `frame-ancestors` value |
