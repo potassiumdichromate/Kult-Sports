@@ -135,7 +135,7 @@ The flow:
 
 ## 5. API
 
-**Base URL:** `https://pixel-agency-api.onrender.com`
+**Base URL:** `https://pixel-agency-api-jzej.onrender.com`
 
 - Requests and responses are JSON.
 - Times are ISO-8601 UTC strings.
@@ -145,7 +145,7 @@ The flow:
 **CORS:** the API only accepts browser calls from origins listed in its `CORS_ORIGINS` setting.
 
 - Once you know the frontend's production URL, it must be added there. That's a backend setting, not a frontend change.
-- In production, only `https` origins are allowed. For local development, use a dev-server proxy, e.g. Vite `server.proxy` from `/api` → `https://pixel-agency-api.onrender.com`, so the browser sees same-origin requests.
+- In production, only `https` origins are allowed. For local development, use a dev-server proxy, e.g. Vite `server.proxy` from `/api` → `https://pixel-agency-api-jzej.onrender.com`, so the browser sees same-origin requests.
 
 ### Errors
 

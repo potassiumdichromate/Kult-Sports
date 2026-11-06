@@ -22,7 +22,7 @@ services:
       - key: NODE_VERSION
         value: "22.20.0"
       - key: PUBLIC_API_URL
-        value: https://pixel-agency-api.onrender.com
+        value: https://pixel-agency-api-jzej.onrender.com
       - key: AI_ARENA_API_URL
         value: https://aiarena-gateway.kult.games
       - key: PRIVY_APP_ID

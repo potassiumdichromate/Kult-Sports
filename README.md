@@ -66,8 +66,8 @@ the first deploy:
 
 | Variable | Default | |
 |---|---|---|
-| `PUBLIC_API_URL` | (unset: use `/api`) | Production: `https://pixel-agency-api.onrender.com`. Browsers call it directly, so the API's per-IP rate limit applies per player. **The API's `CORS_ORIGINS` must include this site's origin.** |
-| `API_URL` | `https://pixel-agency-api.onrender.com` | Target of the `/api` forwarding |
+| `PUBLIC_API_URL` | (unset: use `/api`) | Production: `https://pixel-agency-api-jzej.onrender.com`. Browsers call it directly, so the API's per-IP rate limit applies per player. **The API's `CORS_ORIGINS` must include this site's origin.** |
+| `API_URL` | `https://pixel-agency-api-jzej.onrender.com` | Target of the `/api` forwarding |
 | `AI_ARENA_API_URL` | `https://aiarena-gateway.kult.games` | AI Arena gateway, for the Privy exchange |
 | `PRIVY_APP_ID` | (unset: Privy login hidden) | The shared KULT Privy app, the one AI Arena verifies |
 | `PRIVY_CLIENT_ID` | | Optional Privy client id |

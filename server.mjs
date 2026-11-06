@@ -35,7 +35,7 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = join(fileURLToPath(new URL(".", import.meta.url)), "public");
 const PORT = Number(process.env.PORT || 4400);
-const API_URL = (process.env.API_URL || "https://pixel-agency-api.onrender.com").replace(/\/$/, "");
+const API_URL = (process.env.API_URL || "https://pixel-agency-api-jzej.onrender.com").replace(/\/$/, "");
 const AI_ARENA_API_URL = (process.env.AI_ARENA_API_URL || "https://aiarena-gateway.kult.games").replace(/\/$/, "");
 const PUBLIC_CONFIG = JSON.stringify({
   apiUrl: (process.env.PUBLIC_API_URL || "").replace(/\/$/, "") || null,
