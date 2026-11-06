@@ -8,6 +8,7 @@ import { archetypePortrait } from "./office3d.js";
 import { $, el, show, toast, toastError, busy, fmtPts, fmtCredits, fmtCountdown, MARKET_LABEL, outcomeText, lineIcon } from "./ui.js";
 import * as V from "./views.js";
 import { mountPolymarket, unmountPolymarket } from "./polymarket.js";
+import { createTour } from "./tour.js";
 
 const params = new URLSearchParams(location.search);
 // ?demo=1 / ?demo=fresh: the offline demo; ?demo=0: the real game even when the server defaults to the demo.
@@ -265,6 +266,7 @@ function enter(out) {
 }
 
 function showFound(agents) {
+  setTimeout(() => { if (!$("found").hidden) tour.offer("f-hello", forceTour); }, 400);
   $("found-player").textContent = state.me.player?.username || state.me.player?.walletAddress || "your KULT account";
   const list = $("found-agents");
   state.ceoPick = agents[0];
@@ -374,6 +376,8 @@ async function enterOffice(agency, fresh = false) {
   setTimeout(() => say("ceo", fresh ? "Welcome to the agency! Let's hire a desk." : agency.staff.length ? "Morning, team. Who's playing today?" : "Empty desks… let's find some analysts."), 700);
   try { applyFixtures((await api.fixtures()).fixtures); } catch (e) { if (e.status !== 401) { state.fixtures = []; V.renderConsole($("console"), ctx); toastError(e); } }
   if (mindsCallback) finishMindsLink();
+  // A player who founded the agency mid-tour carries on with it; anyone else new gets it here.
+  if (!tour.running && !mindsCallback) setTimeout(() => { if (state.inOffice && state.view === "office") tour.offer("o-hello", forceTour); }, 1500);
   clearInterval(pollTimer);
   pollTimer = setInterval(() => { if (document.visibilityState === "visible" && state.inOffice && !state.analysing) refreshAll(); }, 90_000);
 }
@@ -723,6 +727,65 @@ async function unlinkMind(btn) {
     toast("Your Mind no longer directs the agency.");
   } catch (e) { toastError(e); busy(btn, false); }
 }
+
+// ------------------------------------------------------------------ tutorial
+// Nova, the KULT guide (the same tutorial as Kult World's, js/tour.js), walks a
+// new player through founding the agency and around the office. Once per
+// player; the top bar's Tutorial button or ?tour shows it again.
+const forceTour = params.has("tour");
+const viewIs = (v) => state.view === v && state.inOffice;
+const navSel = (v) => `#sidebar [data-view="${v}"]`;
+const TOUR_LINES = {
+  "f-hello": "Hi, I'm Nova, your KULT guide! Kult Sports is a football analysis agency: your AI Arena agent runs it, your analysts read every match, and real results win points. Let's open yours.",
+  "f-name": "Name your agency. Pick something the leaderboard will remember: 3 to 32 letters.",
+  "f-ceo": "Now pick your CEO. It's one of your own AI Arena agents, and it makes the final call on every pick.",
+  "f-go": "That's all it takes. Open the agency!",
+  "o-hello": "Welcome to your office! Your analysts work at these desks and your CEO walks the pitch rug. Let me show you around.",
+  "o-hud": "Up top: your agency, its level and points, and your credits. Points come from real match results, and every level adds a desk.",
+  "o-console": "This is the next open match. Analyse it and your analysts read it their own way, then your CEO locks the picks before kickoff.",
+  "o-feed": "The office feed. Your analysts talk here: their reads, the results and payday.",
+  "o-talent-go": "First, staff up. Open Talent.",
+  "o-talent": "Every analyst has a specialty, from form to tactics to set pieces, and a weekly salary. Hire the ones whose read you trust. You can let them go later.",
+  "o-matches-go": "Now open Matches.",
+  "o-matches": "Every fixture from the top five European leagues. Open one for its match room: run an analysis and edit your picks until they lock.",
+  "o-poly-go": "Open Polymarket.",
+  "o-poly": "Live football and Formula 1 prediction markets from Polymarket. Ask your CEO for a read on any question, and trade from your own wallet if you like. KULT never holds your funds.",
+  "o-history": "History keeps every pick you locked and the points it scored.",
+  "o-leaders": "Leaders: the weekly and all-time leaderboards. Exact hits break ties.",
+  "o-agency": "Agency: your level, payroll, credits and CEO. You can also let your Hello Mind direct the agency from here.",
+  "o-office-go": "Back to the office.",
+  "o-done": "You're all set. Hire a desk, analyse the next match and lock your picks before kickoff. Good luck, boss!"
+};
+const tour = createTour({
+  guide: { img: "art/nova.png", name: "NOVA" },
+  lines: TOUR_LINES,
+  doneKeys: () => [`ks.tour.v1.${String(state.me?.player?.id || "anon")}`],
+  onFinish: () => { office.celebrate?.(4); toast("Tutorial complete. Welcome to Kult Sports!"); },
+  steps: [
+    // Founding the agency.
+    { id: "f-hello", phase: "found", next: true, nextLabel: "Let's go", title: "Welcome to Kult Sports" },
+    { id: "f-name", phase: "found", target: "#found-name", next: true, interactive: true },
+    { id: "f-ceo", phase: "found", target: "#found-agents", next: true, interactive: true },
+    { id: "f-go", phase: "found", target: "#found-btn", done: () => state.inOffice, doneDelay: 1200 },
+    // The office.
+    { id: "o-hello", phase: "office", next: true, quiet: () => !state.inOffice },
+    { id: "o-hud", phase: "office", target: "#hud", next: true },
+    { id: "o-console", phase: "office", target: "#console", next: true, skip: () => $("console").hidden },
+    { id: "o-feed", phase: "office", target: "#feed", next: true, skip: () => !$("feed").getClientRects().length },
+    { id: "o-talent-go", phase: "office", target: navSel("talent"), done: () => viewIs("talent") },
+    { id: "o-talent", phase: "office", target: "#talent-view", next: true, lost: () => !viewIs("talent"), fallback: "o-talent-go" },
+    { id: "o-matches-go", phase: "office", target: navSel("matches"), done: () => viewIs("matches") },
+    { id: "o-matches", phase: "office", target: "#matches-view", next: true, lost: () => !viewIs("matches"), fallback: "o-matches-go" },
+    { id: "o-poly-go", phase: "office", target: navSel("polymarket"), done: () => viewIs("polymarket") },
+    { id: "o-poly", phase: "office", target: "#polymarket-view", next: true, lost: () => !viewIs("polymarket"), fallback: "o-poly-go" },
+    { id: "o-history", phase: "office", target: navSel("history"), next: true },
+    { id: "o-leaders", phase: "office", target: navSel("leaders"), next: true },
+    { id: "o-agency", phase: "office", target: navSel("agency"), next: true },
+    { id: "o-office-go", phase: "office", target: navSel("office"), done: () => viewIs("office") },
+    { id: "o-done", phase: "office", next: true, nextLabel: "Let's play", last: true, title: "You're the boss now" }
+  ]
+});
+$("tour-btn").addEventListener("click", () => { if (!state.analysing) { setView("office"); tour.start("o-hello"); } });
 
 // ------------------------------------------------------------------ boot
 async function boot() {

@@ -92,6 +92,7 @@ The Privy dashboard must list this site's origin as allowed.
 | `public/js/api.js` | API client |
 | `public/js/demo.js` | The offline demo API |
 | `public/art/` | The old pixel-art office, no longer used by the 3D office |
+| `public/js/tour.js` | The guided tutorial (the same engine as Kult World's and Kult Create's; keep the copies in sync) |
 | `public/js/polymarket.js` | The Polymarket board (Football: live market, match pulse, analysis; Formula 1), wallet, fund and withdraw |
 | `polymarket-island/` | The Polymarket bundle source (`npm run build:polymarket`): markets, the deposit wallet, CLOB trading, bridge, withdrawals, ported from the old Kult browser |
 | `privy-login/` | The Privy login bundle source |
@@ -124,3 +125,15 @@ custody and settlement.
   bridge deposit addresses for EVM chains, Solana, Bitcoin and Tron;
   **Withdraw** sends pUSD to any Polygon address with one signature.
 - **Your CEO's read** is AI Arena's market signal for the agency's CEO agent.
+
+## Tutorial
+
+Nova, the KULT guide from Kult World, walks a new player through founding the
+agency (name, CEO) and around the office: the top bar, the next match, the
+feed, then Talent, Matches and Polymarket (the player opens each one), History,
+Leaders and Agency. A spotlight shows one thing at a time with the rest dimmed,
+and each step either has a Next button or waits for the player to do it.
+
+It runs once per player (stored in the browser). The top bar's **Tutorial**
+button or `?tour` shows it again. The engine is `public/js/tour.js`, the same
+as Kult World's; the steps and Nova's lines are in `public/js/app.js`.
