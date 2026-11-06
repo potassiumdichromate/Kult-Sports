@@ -10,7 +10,7 @@
   --muted: #b3a9da;
   --pink: #ff4fa3;
   --blue: #4fd8ff;
-  --green: #6ff0a6;
+  --green: #4fd8ff;
   --gold: #ffc94d;
   --red: #ff6b7d;
   --glow-1: #2a1650; --glow-2: #3a0f3a;
@@ -87,7 +87,7 @@ h2.display { font-size: 15px; margin: 0; letter-spacing: 0.06em; text-transform:
 textarea, input { width: 100%; background: var(--well); border: 1px solid var(--line); padding: 10px 12px; border-radius: var(--r-sm); outline: none; resize: vertical; transition: border-color 0.2s, box-shadow 0.2s; }
 textarea:focus, input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(79, 216, 255, 0.18); }
 .progress { height: 10px; background: var(--well); border-radius: 999px; overflow: hidden; border: 1px solid var(--line); }
-#progress-bar { height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, var(--blue), var(--green)); box-shadow: 0 0 14px rgba(111, 240, 166, 0.6); transition: width 0.6s ease; }
+#progress-bar { height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, var(--blue), var(--green)); box-shadow: 0 0 14px rgba(79, 216, 255, 0.6); transition: width 0.6s ease; }
 
 /* ---------------------------------------------------------------- buttons */
 .btn {
@@ -144,7 +144,7 @@ legend { padding: 0; font-weight: 600; }
 .idcard { display: flex; gap: 10px; align-items: center; margin-top: 8px; padding: 10px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--panel-2); }
 .idcard img, .idcard .ph { width: 44px; height: 44px; object-fit: cover; border-radius: 10px; background: var(--well); flex: none; }
 .idcard.bad { border-color: var(--red); }
-.idcard.good { border-color: rgba(111, 240, 166, 0.6); box-shadow: 0 0 18px rgba(111, 240, 166, 0.15); }
+.idcard.good { border-color: rgba(79, 216, 255, 0.6); box-shadow: 0 0 18px rgba(79, 216, 255, 0.15); }
 .ceo-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-top: 6px; }
 .ceo-list > p { grid-column: 1 / -1; margin: 0; }
 .ceo-pick { display: grid; gap: 5px; justify-items: center; padding: 10px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--panel-2); cursor: pointer; text-align: center; font-size: 13.5px; transition: border-color 0.2s, box-shadow 0.2s; }
@@ -158,7 +158,7 @@ legend { padding: 0; font-weight: 600; }
 .close:hover { background: rgba(255, 79, 163, 0.3); transform: rotate(90deg); }
 .eyebrow { font: 700 11px var(--display); letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin: 8px 0; }
 .tag { font: 700 10px var(--display); letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 8px; border: 1px solid var(--line-2); border-radius: 999px; margin-left: 6px; }
-.tag.ok { color: var(--green); border-color: rgba(111, 240, 166, 0.5); } .tag.bad { color: var(--red); border-color: rgba(255, 107, 125, 0.5); } .tag.run { color: var(--gold); border-color: rgba(255, 201, 77, 0.5); }
+.tag.ok { color: var(--green); border-color: rgba(79, 216, 255, 0.5); } .tag.bad { color: var(--red); border-color: rgba(255, 107, 125, 0.5); } .tag.run { color: var(--gold); border-color: rgba(255, 201, 77, 0.5); }
 
 #toast { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 20; padding: 11px 16px; border-radius: 14px; background: rgba(26, 18, 54, 0.85); border: 1px solid var(--line-2); box-shadow: var(--shadow); backdrop-filter: blur(16px); max-width: min(520px, calc(100% - 32px)); }
 #toast.bad { border-color: var(--red); box-shadow: 0 0 24px rgba(255, 107, 125, 0.3); }
@@ -186,28 +186,28 @@ legend { padding: 0; font-weight: 600; }
 *::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.18); border-radius: 999px; border: 2px solid transparent; background-clip: padding-box; }
 *::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.3); background-clip: padding-box; }
 
-/* ---------------------------------------------------------------- pitch-side theme */
+/* ---------------------------------------------------------------- stadium-lights theme */
 :root {
-  --bg: #050f0b; --panel: rgba(10, 34, 26, 0.55); --well: rgba(2, 14, 9, 0.6);
-  --text: #e9fff4; --muted: #94c4ad;
-  --pink: #3ddc84; --blue: #5ec8f2; --green: #7ee081; --gold: #ffc94d; --red: #ff7b6b;
-  --glow-1: #0f3a2a; --glow-2: #3a2f0a;
-  --logo-bg: linear-gradient(135deg, #3ddc84, #1fae8a 55%, #ffc94d); --logo-glow: rgba(61, 220, 132, 0.45);
-  --primary-bg: linear-gradient(135deg, #6ff0a6 0%, #3ddc84 45%, #1fae8a 100%); --primary-line: rgba(170, 255, 210, 0.6); --primary-glow: rgba(61, 220, 132, 0.45); --primary-text: #04140f;
-  --nav-active: linear-gradient(160deg, rgba(61, 220, 132, 0.32), rgba(255, 201, 77, 0.16)); --nav-line: rgba(126, 240, 166, 0.5); --nav-glow: rgba(61, 220, 132, 0.3); --nav-glow-2: rgba(61, 220, 132, 0.9);
+  --bg: #050a1a; --panel: rgba(14, 22, 52, 0.55); --well: rgba(4, 8, 24, 0.6);
+  --text: #eef3ff; --muted: #a3b1d6;
+  --pink: #3b8bff; --blue: #4fd8ff; --green: #4fd8ff; --gold: #ffc94d; --red: #ff6b7d;
+  --glow-1: #13235a; --glow-2: #2a1a4a;
+  --logo-bg: linear-gradient(135deg, #4fd8ff, #3b8bff 50%, #ffc94d); --logo-glow: rgba(59, 139, 255, 0.5);
+  --primary-bg: linear-gradient(135deg, #4fd8ff 0%, #3b8bff 50%, #6a5cff 100%); --primary-line: rgba(160, 200, 255, 0.6); --primary-glow: rgba(59, 139, 255, 0.45); --primary-text: #fff;
+  --nav-active: linear-gradient(160deg, rgba(59, 139, 255, 0.32), rgba(255, 201, 77, 0.16)); --nav-line: rgba(124, 196, 255, 0.5); --nav-glow: rgba(59, 139, 255, 0.3); --nav-glow-2: rgba(59, 139, 255, 0.9);
 }
 #agency-name { font-size: 18px; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .studio > div:last-child { min-width: 0; }
-.logo .logo-ico { width: 24px; height: 24px; fill: none; stroke: #04140f; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.logo .logo-ico { width: 24px; height: 24px; fill: none; stroke: #050b1f; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .sign { font: 700 34px var(--display); letter-spacing: 0.08em; text-align: center; margin: 4px 0 8px; }
-.sign .k { text-shadow: 0 0 18px var(--accent, #3ddc84), 0 0 40px rgba(61, 220, 132, 0.5); }
+.sign .k { text-shadow: 0 0 18px var(--accent, #3b8bff), 0 0 40px rgba(59, 139, 255, 0.5); }
 .sign .s { text-shadow: 0 0 18px var(--gold), 0 0 40px rgba(255, 201, 77, 0.45); }
 .perks { padding-left: 18px; margin: 12px 0 18px; }
 .perks li { margin: 5px 0; }
-.perks li::marker { color: var(--accent, #3ddc84); }
+.perks li::marker { color: var(--accent, #3b8bff); }
 .inline-ico { width: 16px; height: 16px; vertical-align: -3px; margin-right: 6px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 #log li .feed-ico { width: 14px; height: 14px; margin-top: 3px; fill: none; stroke: var(--c); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 4px var(--c)); }
-.ceo-pick canvas { width: 60px; height: 60px; border-radius: 14px; background: radial-gradient(circle at 50% 30%, rgba(61, 220, 132, 0.3), var(--well)); }
+.ceo-pick canvas { width: 60px; height: 60px; border-radius: 14px; background: radial-gradient(circle at 50% 30%, rgba(59, 139, 255, 0.3), var(--well)); }
 
 /* ---------------------------------------------------------------- phones */
 @media (max-width: 860px) {
@@ -351,11 +351,11 @@ body.panel-open #stage, body.panel-open #console { display: none; }
 }
 
 /* ================================================================ Kult Sports */
-:root { --accent: #3ddc84; --accent-ink: var(--well); --exact: #3ddc84; --close: #f2c14e; --miss: #6f8a7d; }
+:root { --accent: #3b8bff; --accent-ink: #050b1f; --exact: #4fd8ff; --close: #f2c14e; --miss: #6f7d9a; }
 
 .sign .k { color: var(--accent); } .sign .s { color: var(--gold); }
 .stars { color: var(--gold); letter-spacing: 1px; font-size: 13px; white-space: nowrap; }
-.stars .off { color: #2c4a3c; }
+.stars .off { color: #2a3558; }
 .chip { display: inline-flex; align-items: center; gap: 5px; font: 700 11px var(--display); padding: 4px 6px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--panel-2); color: var(--muted); white-space: nowrap; }
 .chip i { width: 7px; height: 7px; background: var(--c, var(--accent)); display: inline-block; }
 .hud-level { min-width: 140px; }
@@ -383,7 +383,7 @@ body.panel-open #stage, body.panel-open #console { display: none; }
 .status { font: 700 11px var(--display); padding: 4px 6px; border: 1px solid var(--line); border-radius: var(--r-sm); white-space: nowrap; }
 .status.draft { color: var(--gold); border-color: rgba(255, 201, 77, 0.55); }
 .status.locked { color: var(--blue); border-color: #1d4c66; }
-.status.settled { color: var(--accent); border-color: #1f7a4f; }
+.status.settled { color: var(--accent); border-color: #2a4fa8; }
 .status.closed, .status.void { color: var(--miss); }
 .status.open { color: var(--text); }
 .filters { display: flex; gap: 6px; flex-wrap: wrap; }
@@ -477,10 +477,10 @@ body.panel-open #stage, body.panel-open #console { display: none; }
 .lb td.num, .lb th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .lb .rank { font: 700 15px var(--display); color: var(--muted); width: 48px; }
 .lb tr:nth-child(1) .rank { color: var(--gold); } .lb tr:nth-child(2) .rank { color: #c9d1e0; } .lb tr:nth-child(3) .rank { color: #d08a4f; }
-.lb tr.me td { background: rgba(61, 220, 132, 0.1); } .lb tr.me .rank { color: var(--accent); }
+.lb tr.me td { background: rgba(59, 139, 255, 0.1); } .lb tr.me .rank { color: var(--accent); }
 .lb .ag { font-weight: 600; } .lb .ceo { font-size: 12px; color: var(--muted); }
 .clan { font: 700 11px var(--display); padding: 2px 4px; border: 1px solid currentColor; margin-left: 4px; }
-.clan.ZEROG { color: #b18cff; } .clan.BASE { color: #5ea0ff; } .clan.SOLANA { color: #3ddc84; } .clan.OKX { color: #e6fff2; }
+.clan.ZEROG { color: #b18cff; } .clan.BASE { color: #5ea0ff; } .clan.SOLANA { color: #3b8bff; } .clan.OKX { color: #eef4ff; }
 
 /* analyst sheet */
 .analyst-head { display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 14px; align-items: center; }
@@ -516,11 +516,167 @@ body.panel-open #stage, body.panel-open #console { display: none; }
 /* Your Mind directs: copyable key and message */
 .copy-block { margin-top: 12px; }
 .copy-block .row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-.copy-text { margin: 6px 0 0; padding: 8px 10px; background: var(--well); border: 1px solid var(--line); border-radius: var(--r-sm); color: var(--text, #e8f5ec); font-size: 13px; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 180px; overflow: auto; }
+.copy-text { margin: 6px 0 0; padding: 8px 10px; background: var(--well); border: 1px solid var(--line); border-radius: var(--r-sm); color: var(--text, #eef4ff); font-size: 13px; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 180px; overflow: auto; }
 
 /* Buttons on the pitch-side glass. */
-.btn { background: linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.03)), rgba(22, 78, 58, 0.55); }
-.btn:hover { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 10px 26px rgba(61, 220, 132, 0.25); }
-.sheet { background: linear-gradient(155deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02) 40%), rgba(8, 30, 23, 0.84); }
-#toast { background: rgba(8, 30, 23, 0.88); }
-#tooltip { background: rgba(4, 20, 15, 0.85); }
+.btn { background: linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.03)), rgba(32, 48, 112, 0.55); }
+.btn:hover { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 10px 26px rgba(59, 139, 255, 0.25); }
+.sheet { background: linear-gradient(155deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02) 40%), rgba(12, 20, 48, 0.84); }
+#toast { background: rgba(12, 20, 48, 0.88); }
+#tooltip { background: rgba(6, 12, 32, 0.85); }
+
+/* ================================================================ Glass HUD (v3)
+   The 3D office fills the screen, like Kult World; every panel floats over it:
+   the top bar, the activity feed on the right, the action card above a dock of
+   icon tiles, and the views as large glass sheets. */
+:root { --gap: 14px; --hud-h: 66px; --dock-h: 88px; --feed-w: 320px; --console-w: 660px; }
+body {
+  background:
+    radial-gradient(ellipse at 18% -10%, color-mix(in srgb, var(--accent) 34%, transparent), transparent 52%),
+    radial-gradient(ellipse at 100% 110%, color-mix(in srgb, var(--accent-2) 30%, transparent), transparent 55%),
+    var(--bg);
+}
+
+/* Shared glass: a little denser and with a lit top edge, so text stays crisp over the 3D scene. */
+.panel {
+  background: linear-gradient(170deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02) 38%), var(--glass, rgba(20, 13, 44, 0.66));
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 18px 48px rgba(3, 0, 14, 0.55);
+}
+
+/* ---------------------------------------------------------------- top bar */
+#hud { gap: 14px; padding: 9px 12px 9px 9px; border-radius: 22px; }
+#hud .logo { width: 48px; height: 48px; border-radius: 15px; font: 700 15px var(--display); color: #fff; letter-spacing: 0.04em; }
+#studio-name, #agency-name { font-size: 19px; letter-spacing: 0.03em; }
+#studio-tagline, #agency-sub { font-size: 12.5px; }
+.badge { padding: 6px 12px; border-color: rgba(255, 255, 255, 0.18); background: rgba(255, 255, 255, 0.07); font-weight: 600; }
+.badge.gold { background: rgba(255, 201, 77, 0.1); }
+.credits { padding: 7px 16px 7px 8px; background: linear-gradient(180deg, rgba(255, 201, 77, 0.16), rgba(255, 201, 77, 0.05)); border-color: rgba(255, 201, 77, 0.45); box-shadow: 0 0 22px rgba(255, 201, 77, 0.12); }
+.credits .coin { width: 22px; height: 22px; }
+.credits .display { font-size: 18px; }
+
+/* ---------------------------------------------------------------- dock (the views) */
+#sidebar.panel {
+  gap: 4px; padding: 8px; border-radius: 24px;
+  background: linear-gradient(180deg, rgba(30, 20, 64, 0.95), rgba(10, 6, 24, 0.96));
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.6), 0 0 0 1px color-mix(in srgb, var(--accent) 24%, transparent), 0 0 34px color-mix(in srgb, var(--accent) 16%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+.nav-item { gap: 6px; padding: 4px; border: 0; border-radius: 16px; background: none; color: rgba(241, 237, 255, 0.78); font: 700 11px var(--display); letter-spacing: 0.04em; }
+.nav-item:hover { background: rgba(255, 255, 255, 0.05); color: #fff; }
+.nav-item .ico-slot {
+  display: grid; place-items: center; width: 46px; height: 46px; border-radius: 15px;
+  background: color-mix(in srgb, var(--c, var(--accent)) 16%, rgba(255, 255, 255, 0.03));
+  border: 1px solid color-mix(in srgb, var(--c, var(--accent)) 38%, transparent);
+  transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+}
+.nav-item .ico { width: 23px; height: 23px; color: var(--c, var(--accent)); stroke-width: 2.1; filter: none; }
+.nav-item:hover .ico-slot { transform: translateY(-3px); box-shadow: 0 8px 20px color-mix(in srgb, var(--c, var(--accent)) 35%, transparent); }
+.nav-item.active { background: none; border: 0; box-shadow: none; color: #fff; }
+.nav-item.active .ico-slot {
+  background: linear-gradient(150deg, color-mix(in srgb, var(--c, var(--accent)) 90%, #fff), var(--c, var(--accent)) 45%, color-mix(in srgb, var(--c, var(--accent)) 60%, #0b0717));
+  border-color: color-mix(in srgb, var(--c, var(--accent)) 55%, #fff);
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--c, var(--accent)) 50%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.4), inset 0 -3px 0 rgba(0, 0, 0, 0.22);
+}
+.nav-item.active .ico { color: #fff; filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.45)); }
+.nav-item:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+/* ---------------------------------------------------------------- feed */
+#feed { padding: 14px 12px 12px; border-radius: 22px; }
+.feed-head h2.display { display: flex; align-items: center; gap: 8px; font-size: 13px; letter-spacing: 0.14em; }
+.feed-head h2.display::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--accent-3); box-shadow: 0 0 10px var(--accent-3); animation: livepulse 1.8s ease-in-out infinite; }
+@keyframes livepulse { 50% { opacity: 0.35; } }
+#log li { background: rgba(255, 255, 255, 0.045); border-color: rgba(255, 255, 255, 0.1); border-radius: 14px; }
+
+/* ---------------------------------------------------------------- action card */
+#console { border-radius: 22px; padding: 14px; }
+h2.display { letter-spacing: 0.1em; }
+
+/* ---------------------------------------------------------------- views + sheets */
+.view-panel, #dashboard { border-radius: 24px; }
+.dash-head h2.display { font-size: 26px; letter-spacing: 0.01em; }
+.dash-head .eyebrow { color: var(--accent-3); }
+.overlay { background: radial-gradient(ellipse at 50% 20%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 60%), rgba(5, 2, 15, 0.66); }
+.sheet { border-radius: 26px; border-color: rgba(255, 255, 255, 0.18); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent), 0 30px 90px rgba(3, 0, 14, 0.75); }
+.sheet::before { content: ""; position: absolute; left: 12%; right: 12%; top: -1px; height: 2px; border-radius: 2px; background: linear-gradient(90deg, transparent, var(--accent), var(--accent-3), transparent); opacity: 0.9; }
+.sign { font-size: 44px; letter-spacing: 0.1em; margin: 6px 0 6px; }
+.lead { font-size: 15.5px; }
+.perks { list-style: none; padding: 0; display: grid; gap: 8px; margin: 18px 0 20px; }
+.perks li { display: flex; gap: 10px; align-items: flex-start; margin: 0; padding: 10px 12px; border-radius: 14px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); }
+.perks li::before { content: ""; flex: none; width: 8px; height: 8px; margin-top: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+.boot-dots { border-top-color: var(--accent); border-right-color: var(--accent-3); filter: drop-shadow(0 0 12px var(--accent)); }
+
+/* ================================================================ desktop: floating layout */
+@media (min-width: 861px) {
+  body { overflow: hidden; }
+  #app { display: block; height: 100dvh; padding: 0; }
+  #stage { position: fixed; inset: 0; z-index: 0; border: 0; border-radius: 0; box-shadow: none; background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none; }
+  #stage::after {
+    border-radius: 0;
+    background:
+      linear-gradient(180deg, rgba(5, 2, 15, 0.6), transparent 16%, transparent 70%, rgba(5, 2, 15, 0.7)),
+      radial-gradient(ellipse at 42% 46%, transparent 52%, rgba(5, 2, 15, 0.55) 100%);
+  }
+  #hud { position: fixed; top: var(--gap); left: var(--gap); right: var(--gap); z-index: 6; min-height: var(--hud-h); }
+  #feed { position: fixed; top: calc(var(--gap) * 2 + var(--hud-h)); right: var(--gap); bottom: calc(var(--gap) * 2 + var(--dock-h)); width: var(--feed-w); z-index: 4; }
+  #sidebar.panel { position: fixed; left: calc((100vw - var(--feed-w) - var(--gap)) / 2); bottom: var(--gap); transform: translateX(-50%); z-index: 6; flex-direction: row; }
+  .nav-item { width: 78px; }
+  #console { position: fixed; left: calc((100vw - var(--feed-w) - var(--gap)) / 2); bottom: calc(var(--gap) * 2 + var(--dock-h)); transform: translateX(-50%); width: min(var(--console-w), calc(100vw - var(--feed-w) - var(--gap) * 4)); z-index: 5; }
+  .view-panel, #dashboard {
+    position: fixed; z-index: 5; contain: none;
+    top: calc(var(--gap) * 2 + var(--hud-h)); bottom: calc(var(--gap) * 2 + var(--dock-h));
+    left: var(--gap); right: calc(var(--feed-w) + var(--gap) * 2);
+    padding: 22px 24px 28px;
+    background: linear-gradient(165deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02) 30%), var(--glass-strong, rgba(16, 10, 36, 0.88));
+    animation: sheetpop 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.1);
+  }
+  /* A view opens over the office, which stays visible but steps back. */
+  body.panel-open #stage { display: block; filter: brightness(0.55) saturate(0.8) blur(2px); transition: filter 0.3s; }
+  body.panel-open #console { display: none; }
+}
+/* Narrower desktops: a slimmer feed. */
+@media (min-width: 861px) and (max-width: 1180px) { :root { --feed-w: 270px; } .nav-item { width: 68px; } }
+
+/* ================================================================ phones */
+@media (max-width: 860px) {
+  #app { gap: 12px; padding: 12px 12px 96px; }
+  #stage { border-radius: 22px; }
+  #sidebar.panel { left: 10px; right: 10px; bottom: 10px; padding: 7px 4px; border-radius: 22px; }
+  .nav-item { flex: 1; min-width: 0; padding: 2px; font-size: 9.5px; }
+  .nav-item .ico-slot { width: 40px; height: 40px; border-radius: 13px; }
+  .nav-item .ico { width: 21px; height: 21px; }
+  .sign { font-size: 34px; }
+}
+
+/* ================================================================ Kult Sports theme (v3): stadium lights
+   Electric blue and gold on night navy. No green. */
+:root {
+  --accent: #3b8bff; --accent-2: #6a5cff; --accent-3: #4fd8ff;
+  --glass: rgba(14, 20, 50, 0.66); --glass-strong: rgba(10, 16, 40, 0.9);
+}
+#sidebar [data-view="office"] { --c: #3b8bff; }
+#sidebar [data-view="matches"] { --c: #4fd8ff; }
+#sidebar [data-view="talent"] { --c: #a78bfa; }
+#sidebar [data-view="history"] { --c: #ff7eb6; }
+#sidebar [data-view="leaders"] { --c: #ffc94d; }
+#sidebar [data-view="agency"] { --c: #7cc4ff; }
+#hud .logo { color: #fff; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4); }
+.clan.SOLANA { color: #9945ff; }
+
+/* The next match, as a fixture card. */
+#console { grid-template-columns: minmax(0, 1fr) auto; gap: 14px; }
+.next-match .teams { font-size: 17px; }
+.countdown { color: var(--gold); }
+.fx-row { border-radius: 14px; background: rgba(255, 255, 255, 0.045); }
+.fx-row:hover { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 8px 22px color-mix(in srgb, var(--accent) 25%, transparent); }
+.match-head { border-radius: 18px; background: radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 70%), rgba(255, 255, 255, 0.04); }
+.card { border-radius: 16px; background: rgba(255, 255, 255, 0.045); }
+.seg { border-radius: 12px; overflow: hidden; }
+.seg button[aria-pressed="true"] { background: linear-gradient(135deg, var(--accent-3), var(--accent)); color: #fff; }
+.cand, .staff-card { border-radius: 16px; }
+.lb tr.me td { background: color-mix(in srgb, var(--accent) 14%, transparent); }
+
+#log { overflow-x: hidden; }
+.perks li { position: relative; display: block; padding: 10px 12px 10px 30px; }
+.perks li::before { position: absolute; left: 13px; top: 17px; margin: 0; }
+@media (max-width: 860px) { #console { grid-template-columns: 1fr; } }

@@ -62,9 +62,27 @@ const ctx = {
 function fit() {
   const box = $("stage").getBoundingClientRect();
   if (!box.width || !box.height) return;
+  office.setInsets(stageInsets(box));
   office.resize(box.width, box.height);
 }
-new ResizeObserver(fit).observe($("stage"));
+
+// On desktop the office fills the screen and panels float over it: frame the
+// room in the space they leave (the canvas still draws behind them).
+function stageInsets(box) {
+  if (getComputedStyle($("stage")).position !== "fixed") return { top: 0, right: 0, bottom: 0, left: 0 };
+  const r = (id) => { const n = $(id); return n && !n.hidden && n.getClientRects().length ? n.getBoundingClientRect() : null; };
+  const hud = r("hud"), feed = r("feed"), lows = [r("console"), r("sidebar")].filter(Boolean).map((x) => x.top);
+  return {
+    top: hud ? hud.bottom - box.top + 6 : 0,
+    right: feed ? box.right - feed.left + 6 : 0,
+    bottom: lows.length ? box.bottom - Math.min(...lows) + 6 : 0,
+    left: 16
+  };
+}
+{
+  const ro = new ResizeObserver(() => fit());
+  for (const id of ["stage", "hud", "feed", "console", "sidebar"]) if ($(id)) ro.observe($(id));
+}
 
 const bubbles = new Map();
 function say(id, text, ms = 4200) {
@@ -90,7 +108,7 @@ let last = performance.now();
 function tick(now) {
   const dt = Math.min(0.05, (now - last) / 1000);
   last = now;
-  if (state.inOffice && $("stage").offsetParent) { office.update(dt); office.draw(); placeBubbles(now); }
+  if (state.inOffice && $("stage").getClientRects().length) { office.update(dt); office.draw(); placeBubbles(now); }
   else for (const [id, b] of bubbles) if (now > b.until) { b.node.remove(); bubbles.delete(id); } // don't replay old lines later
   requestAnimationFrame(tick);
 }
@@ -133,7 +151,7 @@ const logSystem = (text) => log("Agency", text, "var(--gold)", "system");
 
 // ------------------------------------------------------------------ icons
 function setupIcons() {
-  for (const slot of document.querySelectorAll(".ico-slot")) slot.replaceWith(lineIcon(slot.dataset.icon));
+  for (const slot of document.querySelectorAll(".ico-slot")) slot.replaceChildren(lineIcon(slot.dataset.icon));
   document.querySelector(".logo")?.replaceChildren(lineIcon("emblem", "logo-ico"));
 }
 
@@ -468,7 +486,7 @@ async function runAnalysis(id) {
   if (!staff.length) office.setState("ceo", "working");
   const chatter = setInterval(() => {
     const p = staff[Math.floor(Math.random() * staff.length)];
-    if (p) office.packet(p.id, SPECIALTY_COLORS[p.specialty] || "#3ddc84");
+    if (p) office.packet(p.id, SPECIALTY_COLORS[p.specialty] || "#3b8bff");
   }, 600);
   let i = 0;
   const lineTimer = setInterval(() => {
@@ -504,8 +522,8 @@ async function runAnalysis(id) {
       await wait(900);
     }
     office.setState(r.analystId, "done");
-    office.addNote(SPECIALTY_COLORS[r.specialty] || "#3ddc84");
-    office.packet(r.analystId, SPECIALTY_COLORS[r.specialty] || "#3ddc84");
+    office.addNote(SPECIALTY_COLORS[r.specialty] || "#3b8bff");
+    office.packet(r.analystId, SPECIALTY_COLORS[r.specialty] || "#3b8bff");
     if (!skip.on) say(r.analystId, r.note, 3200);
     log(`${r.name} · ${r.title}`, `${r.brief?.available ? `${r.brief.narrative} ` : ""}${r.note}`, SPECIALTY_COLORS[r.specialty]);
     if (!skip.on) await wait(1700);

@@ -294,7 +294,7 @@ export function renderAgency(root, ctx) {
       stat("Points", fmtPts(a.points), "var(--accent)"),
       stat("Level", `${a.level}${a.nextLevelAt ? "" : " (max)"}`, "var(--blue)"),
       stat("Desks", `${a.staff.length}/${a.desks}`, "#c792ea"),
-      stat("Weekly rank", a.standings?.weekly ? `#${a.standings.weekly.rank}` : "—", "#7ee081"),
+      stat("Weekly rank", a.standings?.weekly ? `#${a.standings.weekly.rank}` : "—", "#4fd8ff"),
       stat("All-time rank", a.standings?.allTime ? `#${a.standings.allTime.rank}` : "—", "#ff9f5a")),
     section("Next level", a.nextLevelAt ? `${fmtPts(a.points)} / ${fmtPts(a.nextLevelAt)} points · +1 desk` : "Top level: all 7 desks",
       el("div", { class: "bar", style: "height:12px" }, el("i", { style: `--c:var(--accent);width:${Math.max(0, Math.min(100, pct))}%` }))),
