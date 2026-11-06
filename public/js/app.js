@@ -7,6 +7,7 @@ import { Office, SPECIALTY_COLORS } from "./world.js";
 import { archetypePortrait } from "./office3d.js";
 import { $, el, show, toast, toastError, busy, fmtPts, fmtCredits, fmtCountdown, MARKET_LABEL, outcomeText, lineIcon } from "./ui.js";
 import * as V from "./views.js";
+import { mountPolymarket, unmountPolymarket } from "./polymarket.js";
 
 const params = new URLSearchParams(location.search);
 // ?demo=1 / ?demo=fresh: the offline demo; ?demo=0: the real game even when the server defaults to the demo.
@@ -55,8 +56,29 @@ const ctx = {
   closeSheet: (id) => show(id, false),
   signOut: () => signOutEverywhere(),
   portrait: (analystId) => { const p = office.person(analystId); return p ? office.portraitOf(p.look) : office.portraitOf(office.lookFor(analystId)); },
-  portraitFor: (key) => office.portraitOf(office.lookFor(key))
+  portraitFor: (key) => office.portraitOf(office.lookFor(key)),
+  // Polymarket: the Privy island (wallet), a fresh AI Arena token, the CEO's portrait.
+  loadPrivy: () => loadPrivy(),
+  arenaToken: () => freshArenaToken(),
+  ceoPortrait: () => ceoPortrait(),
+  loadFixtures: () => api.fixtures().then((fx) => applyFixtures(fx.fixtures))
 };
+
+// The CEO's 3D portrait, rendered once per archetype; each call gets its own copy.
+const ceoPortraits = new Map();
+function ceoPortrait() {
+  const arch = state.agency ? ceoInfo(state.agency).archetype : "HYBRID";
+  if (!ceoPortraits.has(arch)) ceoPortraits.set(arch, archetypePortrait("models/", arch));
+  const ph = el("span", { class: "ph" });
+  ceoPortraits.get(arch).then((c) => {
+    if (!c || !ph.isConnected) return;
+    const copy = document.createElement("canvas");
+    copy.width = c.width; copy.height = c.height;
+    copy.getContext("2d").drawImage(c, 0, 0);
+    ph.replaceWith(copy);
+  });
+  return ph;
+}
 
 // ------------------------------------------------------------------ office loop
 function fit() {
@@ -357,8 +379,9 @@ async function enterOffice(agency, fresh = false) {
 }
 
 // ------------------------------------------------------------------ views
-const PANELS = { matches: "matches-view", match: "match-view", talent: "talent-view", history: "history-view", leaders: "leaders-view", agency: "agency-view" };
+const PANELS = { matches: "matches-view", match: "match-view", talent: "talent-view", history: "history-view", leaders: "leaders-view", agency: "agency-view", polymarket: "polymarket-view" };
 function setView(view) {
+  if (state.view === "polymarket" && view !== "polymarket") unmountPolymarket();
   state.view = view;
   document.body.classList.toggle("panel-open", view in PANELS);
   for (const [name, id] of Object.entries(PANELS)) show(id, name === view);
@@ -381,7 +404,7 @@ function setView(view) {
 function renderView(view) {
   const root = $(PANELS[view]);
   if (!root || !state.agency) return;
-  ({ matches: V.renderMatches, match: V.renderMatchRoom, talent: V.renderTalent, history: V.renderHistory, leaders: V.renderLeaders, agency: V.renderAgency })[view](root, ctx);
+  ({ matches: V.renderMatches, match: V.renderMatchRoom, talent: V.renderTalent, history: V.renderHistory, leaders: V.renderLeaders, agency: V.renderAgency, polymarket: mountPolymarket })[view](root, ctx);
 }
 for (const b of document.querySelectorAll(".nav-item")) b.addEventListener("click", () => { if (!state.analysing) setView(b.dataset.view); });
 for (const b of document.querySelectorAll("[data-view-link]")) b.addEventListener("click", () => setView(b.dataset.viewLink));

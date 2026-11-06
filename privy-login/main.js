@@ -11,11 +11,14 @@
 //   await privy.tokens()       { accessToken, identityToken }; the access token is
 //                              exchanged for an AI Arena token (see server.mjs)
 //   await privy.logout()
+//   privy.wallet()             the player's EVM wallet for Polymarket on Polygon, or null:
+//                              { address, getEthereumProvider(), sendTransaction(tx) }
 
 import { createElement as h, useEffect, useRef } from "react";
 import { createRoot } from "react-dom/client";
-import { PrivyProvider, usePrivy, useLogin, getAccessToken, getIdentityToken } from "@privy-io/react-auth";
+import { PrivyProvider, usePrivy, useLogin, useWallets, useSendTransaction, getAccessToken, getIdentityToken } from "@privy-io/react-auth";
 import { defineChain } from "viem";
+import { polygon } from "viem/chains";
 
 const zeroGMainnet = defineChain({
   id: 16661,
@@ -34,11 +37,12 @@ const WALLET_LIST = [
 const privyConfig = {
   loginMethods: ["google", "email", "wallet"],
   defaultChain: zeroGMainnet,
-  supportedChains: [zeroGMainnet],
+  // Polygon: Polymarket trading (deposit wallet, approvals, orders) runs there.
+  supportedChains: [zeroGMainnet, polygon],
   embeddedWallets: { ethereum: { createOnLogin: "all-users" } },
   appearance: {
     theme: "dark",
-    accentColor: "#3DDC84",
+    accentColor: "#3B8BFF",
     landingHeader: "Sign in to Kult Sports",
     loginMessage: "Use your KULT account from AI Arena and Creator Studio.",
     showWalletLoginFirst: false,
@@ -55,6 +59,8 @@ export function init({ appId, clientId }) {
     let pendingLogin = null;
     let privyLogout = null;
     let openLogin = null;
+    let currentWallet = null;
+    let sendTx = null;
 
     function Bridge() {
       const { ready, authenticated, logout } = usePrivy();
@@ -62,6 +68,10 @@ export function init({ appId, clientId }) {
         onComplete: () => { pendingLogin?.resolve(); pendingLogin = null; },
         onError: (error) => { pendingLogin?.reject(new Error(String(error || "closed"))); pendingLogin = null; }
       });
+      const { wallets } = useWallets();
+      const { sendTransaction } = useSendTransaction();
+      currentWallet = wallets?.[0] || null;
+      sendTx = sendTransaction;
       const announced = useRef(false);
       privyLogout = logout;
       openLogin = login;
@@ -85,6 +95,15 @@ export function init({ appId, clientId }) {
       return { accessToken: accessToken || undefined, identityToken: identityToken || undefined };
     };
     api.logout = async () => { await privyLogout?.(); };
+    api.wallet = () => {
+      const w = currentWallet;
+      if (!api.authenticated || !w?.address || typeof w.getEthereumProvider !== "function") return null;
+      return {
+        address: w.address,
+        getEthereumProvider: () => w.getEthereumProvider(),
+        sendTransaction: (tx) => sendTx(tx, { address: w.address, uiOptions: { showWalletUIs: true } })
+      };
+    };
 
     const host = document.createElement("div");
     host.id = "kult-privy-root";

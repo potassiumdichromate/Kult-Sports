@@ -16,6 +16,16 @@
 // - /minds/callback   -> where Hello Minds returns after a player links their Mind.
 //                        Redirected to the game page (one URL, relative assets) with
 //                        the OAuth code and state kept, plus mindsCallback=1.
+// - /pm/*             -> Polymarket's public, read-only market data (Gamma
+//                        search/markets/comments, CLOB price history, Data API
+//                        positions/trades), so the Polymarket board loads on
+//                        networks that can't reach those hosts. GET only, a
+//                        fixed list of paths, cached briefly. Funding (bridge)
+//                        and trading (CLOB orders) never go through here: the
+//                        player's browser calls Polymarket itself.
+// - /arena/polymarket/*, /arena/league/leaderboard, /arena/f1/drivers
+//                     -> AI Arena (agent market reads, the deposit-wallet relayer,
+//                        top agents, F1 drivers), server to server like the rest.
 
 import { createServer } from "node:http";
 import { readFileSync } from "node:fs";
@@ -37,8 +47,27 @@ const PUBLIC_CONFIG = JSON.stringify({
   // The spec a player's Mind builds its Skill from (must be the public API address).
   directorSpecUrl: `${(process.env.PUBLIC_API_URL || "").replace(/\/$/, "") || API_URL}/v1/director/openapi.json`,
   // The AI Arena Mind API: talking to other agents, negotiating, relationships.
-  mindApiSpecUrl: `${AI_ARENA_API_URL}/v1/marketplace/mind/openapi.json`
+  mindApiSpecUrl: `${AI_ARENA_API_URL}/v1/marketplace/mind/openapi.json`,
+  // Polymarket Builder Code (a public bytes32 attribution code) for orders and bridge deposits.
+  polymarketBuilderCode: process.env.POLYMARKET_BUILDER_CODE || null
 });
+// Polymarket read-only data: the hosts and paths the board may read.
+const PM_READS = {
+  gamma: { host: "https://gamma-api.polymarket.com", paths: ["/public-search", "/markets", "/comments"] },
+  clob: { host: "https://clob.polymarket.com", paths: ["/prices-history"] },
+  data: { host: "https://data-api.polymarket.com", paths: ["/positions", "/trades"] }
+};
+const PM_TTL_MS = 20_000;
+const pmCache = new Map(); // upstream url -> { at, status, type, body }
+let pmDownUntil = 0; // after a failed read, skip Polymarket briefly
+// AI Arena routes the Polymarket board uses: [path pattern, method].
+const ARENA_ROUTES = [
+  [/^\/arena\/polymarket\/signals\/[^/]+$/, "GET"],
+  [/^\/arena\/polymarket\/signals\/[^/]+\/[0-9a-f-]{36}\/generate$/i, "POST"],
+  [/^\/arena\/polymarket\/relayer\/submit$/, "POST"],
+  [/^\/arena\/league\/leaderboard$/, "GET"],
+  [/^\/arena\/f1\/drivers$/, "GET"]
+];
 // The page links its CSS and scripts under /v/<build>/, so each deploy has new
 // URLs and no cache in front (Cloudflare's browser TTL included) can keep an old
 // office; the scripts' relative imports follow the same prefix. The page itself
@@ -98,6 +127,29 @@ async function proxy(req, res, target) {
   send(res, upstream.status, Buffer.from(await upstream.arrayBuffer()), out);
 }
 
+async function polymarketRead(res, kind, path, search) {
+  const src = PM_READS[kind];
+  if (!src || !src.paths.includes(path)) return json(res, 404, { error: "not_found", message: "Unknown Polymarket path" });
+  const target = `${src.host}${path}${search}`;
+  const hit = pmCache.get(target);
+  if (hit && Date.now() - hit.at < PM_TTL_MS) return send(res, hit.status, hit.body, { "Content-Type": hit.type, "Cache-Control": "no-store" });
+  // While Polymarket is unreachable, answer at once instead of making every request wait out the timeout.
+  if (Date.now() < pmDownUntil) return json(res, 503, { error: "upstream_unavailable", message: "Polymarket can't be reached right now." });
+  let upstream;
+  try {
+    upstream = await fetch(target, { headers: { accept: "application/json" }, signal: AbortSignal.timeout(8_000) });
+  } catch {
+    pmDownUntil = Date.now() + 15_000;
+    return json(res, 503, { error: "upstream_unavailable", message: "Polymarket can't be reached right now." });
+  }
+  const entry = { at: Date.now(), status: upstream.status, type: upstream.headers.get("content-type") || "application/json", body: Buffer.from(await upstream.arrayBuffer()) };
+  if (upstream.ok) {
+    pmCache.set(target, entry);
+    if (pmCache.size > 500) pmCache.delete(pmCache.keys().next().value);
+  }
+  send(res, entry.status, entry.body, { "Content-Type": entry.type, "Cache-Control": "no-store" });
+}
+
 async function serveStatic(req, res, pathname) {
   let rel = decodeURIComponent(pathname);
   if (rel.endsWith("/")) rel += "index.html";
@@ -116,7 +168,7 @@ async function serveStatic(req, res, pathname) {
   const type = TYPES[extname(file).toLowerCase()] || "application/octet-stream";
   // Hashed Privy chunks and this build's versioned files never change;
   // everything else revalidates (ETag).
-  const cache = /[\\/]privy[\\/]chunks[\\/]/.test(file) || v?.[1] === BUILD ? "public, max-age=31536000, immutable" : "no-cache";
+  const cache = /[\\/](?:privy|polymarket)[\\/]chunks[\\/]/.test(file) || v?.[1] === BUILD ? "public, max-age=31536000, immutable" : "no-cache";
   const etag = `W/"${info.size.toString(16)}-${Math.floor(info.mtimeMs).toString(16)}"`;
   if (req.headers["if-none-match"] === etag) return send(res, 304, undefined, { ETag: etag, "Cache-Control": cache });
   send(res, 200, req.method === "HEAD" ? undefined : await readFile(file), { "Content-Type": type, "Cache-Control": cache, ETag: etag });
@@ -136,6 +188,16 @@ createServer(async (req, res) => {
     if (p === "/arena/minds/link" || p === "/arena/minds/mine") {
       if (req.method !== (p.endsWith("link") ? "POST" : "GET")) return json(res, 405, { error: "method_not_allowed", message: "Not allowed" });
       return await proxy(req, res, `${AI_ARENA_API_URL}/v1/marketplace/minds/${p.slice("/arena/minds/".length)}`);
+    }
+    const pm = /^\/pm\/(gamma|clob|data)(\/[a-z-]+)$/.exec(p);
+    if (pm) {
+      if (req.method !== "GET") return json(res, 405, { error: "method_not_allowed", message: "Use GET" });
+      return await polymarketRead(res, pm[1], pm[2], url.search);
+    }
+    const arena = ARENA_ROUTES.find(([re]) => re.test(p));
+    if (arena) {
+      if (req.method !== arena[1]) return json(res, 405, { error: "method_not_allowed", message: `Use ${arena[1]}` });
+      return await proxy(req, res, `${AI_ARENA_API_URL}/v1${p.slice("/arena".length)}${url.search}`);
     }
     if (p === "/minds/callback") {
       const q = new URLSearchParams(url.search);

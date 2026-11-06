@@ -94,7 +94,9 @@ export const ICONS = {
   emblem: '<path d="M12 2 4 5v6c0 5 3.5 9 8 11 4.5-2 8-6 8-11V5z"/><circle cx="12" cy="11" r="3.5"/><path d="M12 7.5v1.2M8.6 10.2l1.2.4M15.4 10.2l-1.2.4"/>',
   whistle: '<path d="M10 9h11v4a6 6 0 1 1-11-3.3"/><circle cx="8" cy="15" r="2"/><path d="M14 9V6"/><path d="M3 6l3 2"/>',
   stopwatch: '<circle cx="12" cy="14" r="8"/><path d="M12 14V10M10 2h4M12 2v4M19 7l1.5-1.5"/>',
-  ball: '<circle cx="12" cy="12" r="9"/><path d="M12 7l4 3-1.5 4.5h-5L8 10z"/>'
+  ball: '<circle cx="12" cy="12" r="9"/><path d="M12 7l4 3-1.5 4.5h-5L8 10z"/>',
+  // Polymarket's cube mark, drawn as a line icon.
+  polymarket: '<path d="M18.5 3 5.5 6.6v10.8L18.5 21z"/><path d="M5.5 6.6l13 5.4-13 5.4"/>'
 };
 export function lineIcon(name, cls = "ico") {
   const ns = "http://www.w3.org/2000/svg", svg = document.createElementNS(ns, "svg");

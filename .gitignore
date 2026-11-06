@@ -3,3 +3,5 @@ node_modules/
 public/privy/
 # built by npm run build (minds-login/)
 public/minds/
+# built by npm run build (polymarket-island/)
+public/polymarket/
