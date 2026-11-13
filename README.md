@@ -72,7 +72,7 @@ the first deploy:
 | `PRIVY_APP_ID` | (unset: Privy login hidden) | The shared KULT Privy app, the one AI Arena verifies |
 | `PRIVY_CLIENT_ID` | | Optional Privy client id |
 | `DEMO_MODE` | (unset) | `1` (or `fresh`) sends every visitor to the offline demo, `?demo=1` (or `?demo=fresh`); `?demo=0` still opens the real game |
-| `MINDS_CLIENT_ID` | (unset: "Your Mind" hidden) | Hello Minds OAuth client id (public), for letting a player's Mind direct their agency. Register `https://<this site>/minds/callback` as its redirect URI and this site as an authorized origin, with scopes `email` and `minds:list`. |
+| `MINDS_CLIENT_ID` | (unset: "Your Mind" hidden) | Hello Minds OAuth client id (public), for letting a player's Mind direct their agency. Register `https://<this site>/minds/callback` as its redirect URI and this site as an authorized origin, with scopes `email` and `minds:list`. Use the OAuth app's client id, not an API key or token (a value starting `eyJ` is refused and the feature stays hidden). |
 | `AI_ARENA_APP_URL` | `https://app.kult.games` | "Create an agent" link |
 | `POLYMARKET_BUILDER_CODE` | (unset) | Polymarket Builder Code (public bytes32) attached to orders and bridge deposits; the old Kult browser's `VITE_POLYMARKET_BUILDER_CODE` |
 | `FRAME_ANCESTORS` | (unset) | Optional CSP `frame-ancestors` value |

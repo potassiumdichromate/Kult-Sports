@@ -37,13 +37,25 @@ const ROOT = join(fileURLToPath(new URL(".", import.meta.url)), "public");
 const PORT = Number(process.env.PORT || 4400);
 const API_URL = (process.env.API_URL || "https://pixel-agency-api-jzej.onrender.com").replace(/\/$/, "");
 const AI_ARENA_API_URL = (process.env.AI_ARENA_API_URL || "https://aiarena-gateway.kult.games").replace(/\/$/, "");
+// Hello Minds answers "Invalid client_id" when MINDS_CLIENT_ID holds a signed
+// token (an API key or access token, "eyJ….….…") instead of the OAuth app's
+// client id. Such a value is refused so the feature stays hidden, not broken.
+function mindsClientId() {
+  const v = String(process.env.MINDS_CLIENT_ID || "").trim();
+  if (!v) return null;
+  if (/^eyJ[\w-]*\.[\w-]+\.[\w-]*$/.test(v)) {
+    console.warn("[kult-sports] MINDS_CLIENT_ID looks like a token, not a Hello Minds OAuth client id: \"Your Mind\" stays hidden until it is set to the app's client id.");
+    return null;
+  }
+  return v;
+}
 const PUBLIC_CONFIG = JSON.stringify({
   apiUrl: (process.env.PUBLIC_API_URL || "").replace(/\/$/, "") || null,
   privyAppId: process.env.PRIVY_APP_ID || null,
   privyClientId: process.env.PRIVY_CLIENT_ID || null,
   aiArenaUrl: process.env.AI_ARENA_APP_URL || "https://app.kult.games",
   // Hello Minds OAuth client (public id) for "Your Mind directs"; unset hides the feature.
-  mindsClientId: process.env.MINDS_CLIENT_ID || null,
+  mindsClientId: mindsClientId(),
   // The spec a player's Mind builds its Skill from (must be the public API address).
   directorSpecUrl: `${(process.env.PUBLIC_API_URL || "").replace(/\/$/, "") || API_URL}/v1/director/openapi.json`,
   // The AI Arena Mind API: talking to other agents, negotiating, relationships.
