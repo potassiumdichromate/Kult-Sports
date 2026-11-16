@@ -1086,3 +1086,6 @@ h2.display { letter-spacing: 0.1em; }
   .tour-text { font-size: 14px; }
 }
 @media (prefers-reduced-motion: reduce) { .tour-arrow svg, .tour-hole::after { animation: none; } .tour-hole::after { opacity: 1; } }
+
+/* The Kult logo in the HUD (was a text badge). */
+.logo.kult-mark, #hud .logo.kult-mark { display: block; padding: 0; border-radius: 50%; background: none !important; box-shadow: 0 6px 16px rgba(5, 0, 20, 0.45); object-fit: contain; }
